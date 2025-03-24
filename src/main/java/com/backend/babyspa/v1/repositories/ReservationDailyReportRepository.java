@@ -29,13 +29,14 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    reservation_daily_report
 			WHERE
 			    (:statusId IS NULL OR status_id = :statusId) AND (:babyId IS NULL OR baby_id = :babyId)
+			AND (tenant_id = :tenantId)
 			GROUP BY
 			    date
 			ORDER BY
 			    MIN(date) ASC
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyId(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId);
+			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
 
 	@Query(value = """
 			SELECT
@@ -45,7 +46,7 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    reservation_daily_report
 			WHERE
 			    (:statusId IS NULL OR status_id = :statusId) AND (:babyId IS NULL OR baby_id = :babyId)
-			AND (date >= :startDate AND date <= :endDate)
+			AND (date >= :startDate AND date <= :endDate) AND (tenant_id = :tenantId)
 			GROUP BY
 			    date
 			ORDER BY
@@ -53,7 +54,8 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDate(
 			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+			@Param("tenantId") String tenantId);
 
 	@Query(value = """
 			SELECT
@@ -63,14 +65,14 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				reservation_daily_report
 			WHERE
 				(:statusId IS NULL OR status_id = :statusId)
-			AND (:babyId IS NULL OR baby_id = :babyId)
+			AND (:babyId IS NULL OR baby_id = :babyId) AND (tenant_id = :tenantId)
 			GROUP BY
 				TO_CHAR(date, 'Month YYYY')
 			ORDER BY
 			 	MIN(date) ASC;
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByMonth(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId);
+			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
 
 	@Query(value = """
 			SELECT
@@ -80,7 +82,7 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    reservation_daily_report
 			WHERE
 			    (:statusId IS NULL OR status_id = :statusId) AND (:babyId IS NULL OR baby_id = :babyId)
-			AND (date >= :startDate AND date <= :endDate)
+			AND (date >= :startDate AND date <= :endDate) AND (tenant_id = :tenantId)
 			GROUP BY
 				TO_CHAR(date, 'Month YYYY')
 			ORDER BY
@@ -88,7 +90,8 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
 			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+			@Param("tenantId") String tenantId);
 
 	@Query(value = """
 			SELECT
@@ -98,14 +101,14 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				reservation_daily_report
 			WHERE
 				(:statusId IS NULL OR status_id = :statusId)
-			AND (:babyId IS NULL OR baby_id = :babyId)
+			AND (:babyId IS NULL OR baby_id = :babyId) AND (tenant_id = :tenantId)
 			GROUP BY
 				TO_CHAR(date, 'YYYY')
 			ORDER BY
 			 	MIN(date) ASC;
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByYear(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId);
+			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
 
 	@Query(value = """
 			SELECT
@@ -115,7 +118,7 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    reservation_daily_report
 			WHERE
 			    (:statusId IS NULL OR status_id = :statusId) AND (:babyId IS NULL OR baby_id = :babyId)
-			AND (date >= :startDate AND date <= :endDate)
+			AND (date >= :startDate AND date <= :endDate) AND (tenant_id = :tenantId)
 			GROUP BY
 				TO_CHAR(date, 'YYYY')
 			ORDER BY
@@ -123,6 +126,7 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 						""", nativeQuery = true)
 	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
 			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+			@Param("tenantId") String tenantId);
 
 }

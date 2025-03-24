@@ -118,7 +118,8 @@ public class BabyService {
 
 	public List<ShortDetailsDto> findAllList() {
 
-		return babyRepository.findAll().stream().map(x -> buildShortDetailsDtoFromBaby(x)).collect(Collectors.toList());
+		return babyRepository.findByTenantId(TenantContext.getTenant()).stream()
+				.map(x -> buildShortDetailsDtoFromBaby(x)).collect(Collectors.toList());
 	}
 
 	private ShortDetailsDto buildShortDetailsDtoFromBaby(Baby baby) {

@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.ServicePackageDailyReportDto;
 import com.backend.babyspa.v1.models.ReportSortEnum;
 import com.backend.babyspa.v1.models.ServicePackageDailyReport;
@@ -49,23 +50,29 @@ public class ServicePackageDailyReportService {
 
 		if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
 			if (groupDataType.equals(ReportSortEnum.day.name())) {
-				return servicePackageDailyReportRepository.findAllByServicePackageId(servicePackageId);
+				return servicePackageDailyReportRepository.findAllByServicePackageId(servicePackageId,
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.month.name())) {
-				return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByMonth(servicePackageId);
+				return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByMonth(servicePackageId,
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.year.name())) {
-				return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByYear(servicePackageId);
+				return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByYear(servicePackageId,
+						TenantContext.getTenant());
 			}
 
 		} else {
 			if (groupDataType.equals(ReportSortEnum.day.name())) {
 				return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDate(
-						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.month.name())) {
 				return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDateGroupByMonth(
-						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.year.name())) {
 				return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDateGroupByYear(
-						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
+						TenantContext.getTenant());
 			}
 		}
 		return null;

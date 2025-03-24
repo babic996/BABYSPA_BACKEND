@@ -1,6 +1,7 @@
 package com.backend.babyspa.v1.repositories;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,8 @@ import com.backend.babyspa.v1.models.Baby;
 public interface BabyRepository extends JpaRepository<Baby, Integer> {
 
 	boolean existsByPhoneNumberAndBabyNameAndTenantId(String phoneNumber, String babyName, String tenantId);
+
+	List<Baby> findByTenantId(String tenantId);
 
 	boolean existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNot(String phoneNumber, String babyName, String tenantId,
 			int babyId);

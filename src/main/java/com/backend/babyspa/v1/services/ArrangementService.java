@@ -263,7 +263,8 @@ public class ArrangementService {
 
 	public List<ShortDetailsDto> findAllArrangementList() {
 
-		List<ShortDetailsDto> arrangementList = arrangementRepository.findByRemainingTermGreaterThan(0).stream()
+		List<ShortDetailsDto> arrangementList = arrangementRepository
+				.findByRemainingTermGreaterThanAndTenantId(0, TenantContext.getTenant()).stream()
 				.map(x -> buildShortDetailsFromArrangement(x)).collect(Collectors.toList());
 
 		return arrangementList;

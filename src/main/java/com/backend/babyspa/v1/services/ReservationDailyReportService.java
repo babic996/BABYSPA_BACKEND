@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.ReservationDailyReportDto;
 import com.backend.babyspa.v1.models.ReportSortEnum;
 import com.backend.babyspa.v1.models.ReservationDailyReport;
@@ -53,23 +54,28 @@ public class ReservationDailyReportService {
 
 		if (Objects.isNull(startRangeDate) && Objects.isNull(startRangeDate)) {
 			if (groupDataType.equals(ReportSortEnum.day.name())) {
-				return reservationDailyReportRepository.findAllByStatusIdAndBabyId(statusId, babyId);
+				return reservationDailyReportRepository.findAllByStatusIdAndBabyId(statusId, babyId,
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.month.name())) {
-				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByMonth(statusId, babyId);
+				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByMonth(statusId, babyId,
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.year.name())) {
-				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByYear(statusId, babyId);
+				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByYear(statusId, babyId,
+						TenantContext.getTenant());
 			}
 
 		} else {
 			if (groupDataType.equals(ReportSortEnum.day.name())) {
 				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDate(statusId,
-						babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(), TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.month.name())) {
 				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
-						statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
+						TenantContext.getTenant());
 			} else if (groupDataType.equals(ReportSortEnum.year.name())) {
 				return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
-						statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate());
+						statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
+						TenantContext.getTenant());
 			}
 		}
 

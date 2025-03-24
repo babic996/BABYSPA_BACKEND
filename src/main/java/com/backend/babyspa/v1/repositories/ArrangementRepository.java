@@ -19,7 +19,7 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
 	@Query(value = "SELECT * FROM arrangement ORDER BY arrangement_id DESC", nativeQuery = true)
 	List<Arrangement> findAllNative();
 
-	List<Arrangement> findByRemainingTermGreaterThan(int remainingTerm);
+	List<Arrangement> findByRemainingTermGreaterThanAndTenantId(int remainingTerm, String tenantId);
 
 	boolean existsByServicePackage(ServicePackage servicePackage);
 
