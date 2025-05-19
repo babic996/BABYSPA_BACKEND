@@ -14,16 +14,17 @@ import lombok.Setter;
 @NoArgsConstructor
 public class FindAllArrangementDto {
 
-	private int arrangementId;
-	private LocalDateTime createdAt;
-	private int remainingTerm;
-	private Integer extendDurationDays;
-	private BigDecimal price;
-	private String note;
-	private ShortDetailsDto discount;
-	private ShortDetailsDto babyDetails;
-	private ShortDetailsDto status;
-	private ShortDetailsDto servicePackage;
-	private ShortDetailsDto paymentType;
+    private int arrangementId;
+    private LocalDateTime createdAt;
+    private int remainingTerm;
+    private Integer extendDurationDays;
+    private BigDecimal price;
+    private String note;
+    private ShortDetailsDto giftCard;
+    private ShortDetailsDto discount;
+    private ShortDetailsDto babyDetails;
+    private ShortDetailsDto status;
+    private ShortDetailsDto servicePackage;
+    private ShortDetailsDto paymentType;
 
 }

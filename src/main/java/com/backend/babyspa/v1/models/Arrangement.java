@@ -24,55 +24,59 @@ import lombok.Setter;
 @Table(name = "arrangement")
 public class Arrangement {
 
-	@Id
-	@Column(name = "arrangement_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int arrangementId;
+    @Id
+    @Column(name = "arrangement_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int arrangementId;
 
-	@Column(name = "created_at", nullable = false)
-	private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-	@Column(name = "remaining_term", nullable = false)
-	private int remainingTerm;
+    @Column(name = "remaining_term", nullable = false)
+    private int remainingTerm;
 
-	@Column(name = "extend_duration_days", nullable = true)
-	private Integer extendDurationDays;
+    @Column(name = "extend_duration_days", nullable = true)
+    private Integer extendDurationDays;
 
-	@Column(name = "price", nullable = false)
-	private BigDecimal price;
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
-	@Column(name = "note", columnDefinition = "TEXT", nullable = true)
-	private String note;
+    @Column(name = "note", columnDefinition = "TEXT", nullable = true)
+    private String note;
 
-	@ManyToOne
-	@JoinColumn(name = "discount_id", nullable = true)
-	private Discount discount;
+    @ManyToOne
+    @JoinColumn(name = "discount_id", nullable = true)
+    private Discount discount;
 
-	@ManyToOne
-	@JoinColumn(name = "baby_id", nullable = false)
-	private Baby baby;
+    @ManyToOne
+    @JoinColumn(name = "baby_id", nullable = false)
+    private Baby baby;
 
-	@ManyToOne
-	@JoinColumn(name = "status_id", nullable = false)
-	private Status status;
+    @ManyToOne
+    @JoinColumn(name = "status_id", nullable = false)
+    private Status status;
 
-	@ManyToOne
-	@JoinColumn(name = "service_package_id", nullable = false)
-	private ServicePackage servicePackage;
+    @ManyToOne
+    @JoinColumn(name = "service_package_id", nullable = false)
+    private ServicePackage servicePackage;
 
-	@ManyToOne
-	@JoinColumn(name = "payment_type_id", nullable = true)
-	private PaymentType paymentType;
+    @ManyToOne
+    @JoinColumn(name = "payment_type_id", nullable = true)
+    private PaymentType paymentType;
 
-	@ManyToOne
-	@JoinColumn(name = "created_by_user_id", referencedColumnName = "user_id", nullable = false)
-	private User createdByUser;
+    @ManyToOne
+    @JoinColumn(name = "gift_card_id", nullable = true)
+    private GiftCard giftCard;
 
-	@ManyToOne
-	@JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id", nullable = true)
-	private User updatedByUser;
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id", referencedColumnName = "user_id", nullable = false)
+    private User createdByUser;
 
-	@Column(name = "tenant_id", nullable = false)
-	private String tenantId;
+    @ManyToOne
+    @JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id", nullable = true)
+    private User updatedByUser;
+
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId;
 
 }

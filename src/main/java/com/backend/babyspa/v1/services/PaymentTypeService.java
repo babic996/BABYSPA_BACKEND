@@ -13,18 +13,18 @@ import com.backend.babyspa.v1.repositories.PaymentTypeRepository;
 @Service
 public class PaymentTypeService {
 
-	@Autowired
-	PaymentTypeRepository paymentTypeRepository;
+    @Autowired
+    PaymentTypeRepository paymentTypeRepository;
 
-	public PaymentType findById(Integer paymentTypeId) throws NotFoundException {
+    public PaymentType findById(Integer paymentTypeId) throws NotFoundException {
 
-		return paymentTypeRepository.findById(paymentTypeId)
-				.orElseThrow(() -> new NotFoundException("Nije pronađen tip plaćanja sa ID: " + paymentTypeId + "!"));
-	}
+        return paymentTypeRepository.findById(paymentTypeId)
+                .orElseThrow(() -> new NotFoundException("Nije pronađen tip plaćanja sa ID: " + paymentTypeId + "!"));
+    }
 
-	public List<PaymentType> findAll() {
+    public List<PaymentType> findAll() {
 
-		return paymentTypeRepository.findByTenantId(TenantContext.getTenant());
-	}
+        return paymentTypeRepository.findByTenantId(TenantContext.getTenant());
+    }
 
 }

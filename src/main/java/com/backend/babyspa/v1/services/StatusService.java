@@ -17,75 +17,75 @@ import jakarta.transaction.Transactional;
 @Service
 public class StatusService {
 
-	@Autowired
-	StatusRepository statusRepository;
+    @Autowired
+    StatusRepository statusRepository;
 
-	@Autowired
-	StatusTypeService statusTypeService;
+    @Autowired
+    StatusTypeService statusTypeService;
 
-	public Status findById(int statusId) throws NotFoundException {
+    public Status findById(int statusId) throws NotFoundException {
 
-		return statusRepository.findById(statusId)
-				.orElseThrow(() -> new NotFoundException("Nije pronadjen status sa id: " + statusId + "!"));
-	}
+        return statusRepository.findById(statusId)
+                .orElseThrow(() -> new NotFoundException("Nije pronadjen status sa id: " + statusId + "!"));
+    }
 
-	public Status findByStatusCode(String statusCode) throws NotFoundException {
+    public Status findByStatusCode(String statusCode) throws NotFoundException {
 
-		return statusRepository.findByStatusCode(statusCode)
-				.orElseThrow(() -> new NotFoundException("Nije pronadjen status sa kodom: " + statusCode + "!"));
-	}
+        return statusRepository.findByStatusCode(statusCode)
+                .orElseThrow(() -> new NotFoundException("Nije pronadjen status sa kodom: " + statusCode + "!"));
+    }
 
-	public Status save(CreateStatusDto createStatusDto) throws Exception {
+    public Status save(CreateStatusDto createStatusDto) throws Exception {
 
-		Status status = new Status();
-		StatusType statusType = statusTypeService.findById(createStatusDto.getStatusTypeId());
+        Status status = new Status();
+        StatusType statusType = statusTypeService.findById(createStatusDto.getStatusTypeId());
 
-		if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(createStatusDto.getStatusName(),
-				createStatusDto.getStatusCode(), statusType)) {
-			throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
-		}
+        if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(createStatusDto.getStatusName(),
+                createStatusDto.getStatusCode(), statusType)) {
+            throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
+        }
 
-		status.setStatusCode(createStatusDto.getStatusCode());
-		status.setStatusName(createStatusDto.getStatusName());
-		status.setStatusType(statusType);
+        status.setStatusCode(createStatusDto.getStatusCode());
+        status.setStatusName(createStatusDto.getStatusName());
+        status.setStatusType(statusType);
 
-		return statusRepository.save(status);
-	}
+        return statusRepository.save(status);
+    }
 
-	public Status update(UpdateStatusDto updateStatusDto) throws Exception {
+    public Status update(UpdateStatusDto updateStatusDto) throws Exception {
 
-		Status status = findById(updateStatusDto.getStatusId());
-		StatusType statusType = statusTypeService.findById(updateStatusDto.getStatusTypeId());
+        Status status = findById(updateStatusDto.getStatusId());
+        StatusType statusType = statusTypeService.findById(updateStatusDto.getStatusTypeId());
 
-		if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(updateStatusDto.getStatusName(),
-				updateStatusDto.getStatusCode(), statusType, status.getStatusId())) {
-			throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
-		}
+        if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(updateStatusDto.getStatusName(),
+                updateStatusDto.getStatusCode(), statusType, status.getStatusId())) {
+            throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
+        }
 
-		status.setStatusCode(updateStatusDto.getStatusCode());
-		status.setStatusName(updateStatusDto.getStatusName());
-		status.setStatusType(statusType);
+        status.setStatusCode(updateStatusDto.getStatusCode());
+        status.setStatusName(updateStatusDto.getStatusName());
+        status.setStatusType(statusType);
 
-		return statusRepository.save(status);
-	}
+        return statusRepository.save(status);
+    }
 
-	@Transactional
-	public int delete(int statusId) throws NotFoundException {
+    @Transactional
+    public int delete(int statusId) throws NotFoundException {
 
-		Status status = findById(statusId);
+        Status status = findById(statusId);
 
-		statusRepository.delete(status);
-		return statusId;
-	}
+        statusRepository.delete(status);
+        return statusId;
+    }
 
-	public List<Status> findAll() {
+    public List<Status> findAll() {
 
-		return statusRepository.findAll();
-	}
+        return statusRepository.findAll();
+    }
 
-	public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
+    public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
 
-		return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
-	}
+        return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
+    }
 
 }

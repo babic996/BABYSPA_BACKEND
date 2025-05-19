@@ -3,6 +3,7 @@ package com.backend.babyspa.v1.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,203 +40,204 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-	@Autowired
-	UserRepository userRepository;
+    @Autowired
+    UserRepository userRepository;
 
-	@Autowired
-	PasswordEncoder passwordEncoder;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-	@Autowired
-	AuthenticationManager authenticationManager;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    UserDetailsServiceImpl userDetailsService;
 
-	@Autowired
-	JwtUtil jwtUtil;
+    @Autowired
+    JwtUtil jwtUtil;
 
-	@Autowired
-	UserRoleRepository userRoleRepository;
+    @Autowired
+    UserRoleRepository userRoleRepository;
 
-	@Autowired
-	RoleService roleService;
+    @Autowired
+    RoleService roleService;
 
-	public User findById(int userId) throws NotFoundException {
+    @Autowired
+    UserRoleService userRoleService;
 
-		return userRepository.findById(userId)
-				.orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je ID: " + userId + "!"));
-	}
+    public User findById(int userId) throws NotFoundException {
 
-	public UserInfoDto findUserInfoByUserId(int userId) throws NotFoundException {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je ID: " + userId + "!"));
+    }
 
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je ID: " + userId + "!"));
+    public UserInfoDto findUserInfoByUserId(int userId) throws NotFoundException {
 
-		UserInfoDto userInfoDto = new UserInfoDto();
-		userInfoDto.setEmail(user.getEmail());
-		userInfoDto.setFirstName(user.getFirstName());
-		userInfoDto.setLastName(user.getLastName());
-		userInfoDto.setUsername(user.getUsername().split("@")[0]);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je ID: " + userId + "!"));
 
-		return userInfoDto;
-	}
+        return buildUserInfoFromUser(user);
+    }
 
-	public User findByUsername(String username) throws NotFoundException {
+    public List<UserInfoDto> findAllUsers(List<String> excludedRoleNames) {
 
-		return userRepository.findByUsername(username)
-				.orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je username: " + username + "!"));
-	}
+        List<UserInfoDto> users = new ArrayList<UserInfoDto>();
 
-	public User register(RegisterNewUserDto registerNewUserDto, Authentication authentication) throws Exception {
+        if (Objects.isNull(excludedRoleNames) || excludedRoleNames.isEmpty()) {
+            users = userRepository.findByTenantId(TenantContext.getTenant()).stream().map((user) -> buildUserInfoFromUser(user)).collect(Collectors.toList());
+        } else {
+            users = userRepository.findByTenantId(TenantContext.getTenant()).stream()
+                    .map(this::buildUserInfoFromUser)
+                    .filter(userInfo -> userInfo.getRoles().stream()
+                            .map(Role::getRoleName)
+                            .noneMatch(excludedRoleNames::contains))
+                    .collect(Collectors.toList());
+        }
 
-		boolean hasPermission = authentication.getAuthorities().stream()
-				.anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")
-						|| authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+        return users;
+    }
 
-		if (!hasPermission) {
-			throw new Exception("Ovaj korisnik nema ovlaštenje da kreira naloge.");
-		}
+    public User findByUsername(String username) throws NotFoundException {
 
-		User user = new User();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Nije pronađen korisnik čiji je username: " + username + "!"));
+    }
 
-		if (userRepository.existsByUsername(registerNewUserDto.getUsername())) {
-			throw new IllegalArgumentException("Username već postoji.");
-		}
+    public User register(RegisterNewUserDto registerNewUserDto, Authentication authentication) throws Exception {
 
-		if (userRepository.existsByEmail(registerNewUserDto.getEmail())) {
-			throw new IllegalArgumentException("Email već postoji.");
-		}
+        boolean hasPermission = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")
+                        || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
-		user.setEmail(registerNewUserDto.getEmail());
-		user.setFirstName(registerNewUserDto.getFirstName());
-		user.setLastName(registerNewUserDto.getLastName());
-		user.setUsername(registerNewUserDto.getUsername() + "@" + TenantContext.getTenant());
-		user.setPassword(passwordEncoder.encode(registerNewUserDto.getPassword()));
+        if (!hasPermission) {
+            throw new Exception("Ovaj korisnik nema ovlaštenje da kreira naloge.");
+        }
 
-		return userRepository.save(user);
-	}
+        User user = new User();
 
-	@Transactional
-	public User addNewTenantUser(AddNewTenantUserDto addNewTenantUserDto, Authentication authentication)
-			throws Exception {
+        if (userRepository.existsByUsername(registerNewUserDto.getUsername())) {
+            throw new IllegalArgumentException("Username već postoji.");
+        }
 
-		boolean hasPermission = authentication.getAuthorities().stream()
-				.anyMatch(authority -> authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
-		if (!hasPermission) {
-			throw new Exception("Ovaj korisnik nema ovlaštenje da dodaje nove tenante.");
-		}
+        if (userRepository.existsByEmail(registerNewUserDto.getEmail())) {
+            throw new IllegalArgumentException("Email već postoji.");
+        }
 
-		User user = new User();
+        user.setEmail(registerNewUserDto.getEmail());
+        user.setFirstName(registerNewUserDto.getFirstName());
+        user.setLastName(registerNewUserDto.getLastName());
+        user.setUsername(registerNewUserDto.getUsername() + "@" + TenantContext.getTenant());
+        user.setPassword(passwordEncoder.encode(registerNewUserDto.getPassword()));
 
-		if (userRepository.existsByUsername(addNewTenantUserDto.getUsername())) {
-			throw new IllegalArgumentException("Username već postoji.");
-		}
+        return userRepository.save(user);
+    }
 
-		if (userRepository.existsByEmail(addNewTenantUserDto.getEmail())) {
-			throw new IllegalArgumentException("Email već postoji.");
-		}
+    @Transactional
+    public User addNewTenantUser(AddNewTenantUserDto addNewTenantUserDto, Authentication authentication) {
 
-		user.setEmail(addNewTenantUserDto.getEmail());
-		user.setFirstName(addNewTenantUserDto.getFirstName());
-		user.setLastName(addNewTenantUserDto.getLastName());
-		user.setUsername(addNewTenantUserDto.getUsername());
-		user.setPassword(passwordEncoder.encode(addNewTenantUserDto.getPassword()));
+        boolean hasPermission = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+        if (!hasPermission) {
+            throw new IllegalArgumentException("Ovaj korisnik nema ovlaštenje da dodaje nove tenante.");
+        }
 
-		userRepository.save(user);
+        User user = new User();
 
-		Role role = roleService.findByRoleName("ROLE_ADMIN");
-		AssignRolesDto assignRolesDto = new AssignRolesDto();
-		List<Integer> roleIds = new ArrayList<>();
+        if (userRepository.existsByUsername(addNewTenantUserDto.getUsername())) {
+            throw new IllegalArgumentException("Username već postoji.");
+        }
 
-		roleIds.add(role.getRoleId());
-		assignRolesDto.setRoleIds(roleIds);
-		assignRolesDto.setUserId(user.getUserId());
+        if (userRepository.existsByEmail(addNewTenantUserDto.getEmail())) {
+            throw new IllegalArgumentException("Email već postoji.");
+        }
 
-		assignRolesToUser(assignRolesDto, authentication);
+        user.setEmail(addNewTenantUserDto.getEmail());
+        user.setFirstName(addNewTenantUserDto.getFirstName());
+        user.setLastName(addNewTenantUserDto.getLastName());
+        user.setUsername(addNewTenantUserDto.getUsername());
+        user.setPassword(passwordEncoder.encode(addNewTenantUserDto.getPassword()));
 
-		return user;
-	}
+        userRepository.save(user);
 
-	public LoginResponseDto loginUser(LoginDto loginDto) throws BadCredentialsException {
-		try {
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		} catch (BadCredentialsException ex) {
-			throw new BadCredentialsException("Pogrešni kredencijali!");
-		}
-		UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getUsername());
-		String jwt = jwtUtil.generateToken(userDetails);
-		return new LoginResponseDto(jwt);
-	}
+        Role role = roleService.findByRoleName("ROLE_ADMIN");
+        AssignRolesDto assignRolesDto = new AssignRolesDto();
+        List<Integer> roleIds = new ArrayList<>();
 
-	public String changePassword(ChangePasswordDto changePasswordDto, Authentication authentication) throws Exception {
+        roleIds.add(role.getRoleId());
+        assignRolesDto.setRoleIds(roleIds);
+        assignRolesDto.setUserId(user.getUserId());
 
-		User user = userRepository.findByUsername(authentication.getName())
-				.orElseThrow(() -> new UsernameNotFoundException("Korisnik nije pronađen."));
+        userRoleService.assignRolesToUser(assignRolesDto, authentication);
 
-		if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPassword())) {
-			throw new Exception("Stari password nije tačan.");
-		}
+        return user;
+    }
 
-		user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
-		userRepository.save(user);
+    public LoginResponseDto loginUser(LoginDto loginDto) throws BadCredentialsException {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (BadCredentialsException ex) {
+            throw new BadCredentialsException("Pogrešni kredencijali!");
+        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getUsername());
+        String jwt = jwtUtil.generateToken(userDetails);
+        return new LoginResponseDto(jwt);
+    }
 
-		return "Uspješno ste promijenili password";
-	}
+    public String changePassword(ChangePasswordDto changePasswordDto, Authentication authentication) throws Exception {
 
-	public User updateUser(UpdateUserDto updateUserDto, Authentication authentication) throws Exception {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Korisnik nije pronađen."));
 
-		User user = userRepository.findByUsername(authentication.getName())
-				.orElseThrow(() -> new UsernameNotFoundException("Korisnik nije pronađen."));
+        if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPassword())) {
+            throw new Exception("Stari password nije tačan.");
+        }
 
-		if (Objects.nonNull(updateUserDto.getNewPassword())) {
-			if (!passwordEncoder.matches(updateUserDto.getOldPassword(), user.getPassword())) {
-				throw new Exception("Stari password nije tačan.");
-			}
-			user.setPassword(passwordEncoder.encode(updateUserDto.getNewPassword()));
-		}
+        user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        userRepository.save(user);
 
-		if (userRepository.existsByUsernameAndUserIdNot(updateUserDto.getUsername() + user.getTenantId(),
-				user.getUserId())) {
-			throw new Exception("Postoji korisnik sa unijetim username-om.");
-		}
+        return "Uspješno ste promijenili password";
+    }
 
-		if (userRepository.existsByEmailAndUserIdNot(updateUserDto.getEmail(), user.getUserId())) {
-			throw new Exception("Postoji korisnik sa unijetim email-om.");
-		}
+    public User updateUser(UpdateUserDto updateUserDto, Authentication authentication) throws Exception {
 
-		user.setEmail(updateUserDto.getEmail());
-		user.setFirstName(updateUserDto.getFirstName());
-		user.setLastName(updateUserDto.getLastName());
-		user.setUsername(updateUserDto.getUsername() + "@" + user.getTenantId());
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Korisnik nije pronađen."));
 
-		return userRepository.save(user);
+        if (Objects.nonNull(updateUserDto.getNewPassword())) {
+            if (!passwordEncoder.matches(updateUserDto.getOldPassword(), user.getPassword())) {
+                throw new Exception("Stari password nije tačan.");
+            }
+            user.setPassword(passwordEncoder.encode(updateUserDto.getNewPassword()));
+        }
 
-	}
+        if (userRepository.existsByUsernameAndUserIdNot(updateUserDto.getUsername() + user.getTenantId(),
+                user.getUserId())) {
+            throw new Exception("Postoji korisnik sa unijetim username-om.");
+        }
 
-	@Transactional
-	public String assignRolesToUser(AssignRolesDto assignRolesDto, Authentication authentication) throws Exception {
+        if (userRepository.existsByEmailAndUserIdNot(updateUserDto.getEmail(), user.getUserId())) {
+            throw new Exception("Postoji korisnik sa unijetim email-om.");
+        }
 
-		boolean hasSuperAdminRole = authentication.getAuthorities().stream()
-				.anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-		if (!hasSuperAdminRole) {
-			throw new Exception("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
-		}
+        user.setEmail(updateUserDto.getEmail());
+        user.setFirstName(updateUserDto.getFirstName());
+        user.setLastName(updateUserDto.getLastName());
+        user.setUsername(updateUserDto.getUsername() + "@" + user.getTenantId());
 
-		User user = findById(assignRolesDto.getUserId());
+        return userRepository.save(user);
 
-		userRoleRepository.deleteByUser(user);
-		assignRolesDto.getRoleIds().forEach(roleId -> {
-			UserRole userRole = new UserRole();
-			Role role = roleService.findById(roleId);
-			userRole.setRole(role);
-			userRole.setUser(user);
-			userRole.setUserRoleKey(new UserRoleKey(user.getUserId(), role.getRoleId()));
-			userRoleRepository.save(userRole);
-		});
+    }
 
-		return "Uspješno ste dodijelili uloge korisniku: " + user.getUsername() + "!";
-	}
+    private UserInfoDto buildUserInfoFromUser(User user) {
+        UserInfoDto userInfoDto = new UserInfoDto();
+        userInfoDto.setUserId(user.getUserId());
+        userInfoDto.setUsername(user.getUsername());
+        userInfoDto.setFirstName(user.getFirstName());
+        userInfoDto.setLastName(user.getLastName());
+        userInfoDto.setEmail(user.getEmail());
+        userInfoDto.setRoles(userRoleService.findByUser(user));
 
+        return userInfoDto;
+    }
 }
