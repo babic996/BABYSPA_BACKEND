@@ -76,8 +76,11 @@ public class GiftCardController extends BaseController {
                                                                          @RequestParam(required = false) Integer giftCardId,
                                                                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
-
-        return createSuccessResponse(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate));
+        try {
+            return createSuccessResponse(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate));
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
     }
 
     @DeleteMapping("/delete")

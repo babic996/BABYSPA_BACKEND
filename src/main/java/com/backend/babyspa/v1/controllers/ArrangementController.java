@@ -109,9 +109,13 @@ public class ArrangementController extends BaseController {
                                                                             @RequestParam(required = false) Integer arrangementId,
                                                                             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+        try {
+            return createSuccessResponse(arrangementService.findAll(page, size, babyId, statusId, servicePackageId,
+                    paymentTypeId, giftCardId, remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
 
-        return createSuccessResponse(arrangementService.findAll(page, size, babyId, statusId, servicePackageId,
-                paymentTypeId, giftCardId, remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
     }
 
     @GetMapping("/find-price")
@@ -125,9 +129,13 @@ public class ArrangementController extends BaseController {
                                                                 @RequestParam(required = false) Integer arrangementId,
                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+        try {
+            return createSuccessResponse(arrangementService.findTotalSum(babyId, statusId, servicePackageId, paymentTypeId, giftCardId,
+                    remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
 
-        return createSuccessResponse(arrangementService.findTotalSum(babyId, statusId, servicePackageId, paymentTypeId, giftCardId,
-                remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
     }
 
     @GetMapping("/find-all-list")

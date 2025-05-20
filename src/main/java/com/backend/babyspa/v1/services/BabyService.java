@@ -38,10 +38,8 @@ public class BabyService {
 
     public Baby findById(Integer babyId) throws NotFoundException {
 
-        Baby baby = babyRepository.findById(babyId)
+        return babyRepository.findById(babyId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjena beba sa ID: " + babyId + "!"));
-
-        return baby;
     }
 
     public Baby save(CreateBabyDto createBabyDto) throws Exception {

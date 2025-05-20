@@ -35,11 +35,15 @@ public class BabyController extends BaseController {
     BabyService babyService;
 
     @GetMapping("/find-by-id")
-    public Baby findById(@RequestParam Integer babyId) throws NotFoundException {
+    public ResponseEntity<ApiResponse<Baby>> findById(@RequestParam Integer babyId) throws NotFoundException {
+        try {
+            return createSuccessResponse(babyService.findById(babyId));
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
 
-        return babyService.findById(babyId);
     }
-	
+
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<Baby>> save(@RequestBody @Valid CreateBabyDto createBabyDto,
                                                   BindingResult bindingResult) {
@@ -90,14 +94,24 @@ public class BabyController extends BaseController {
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
 
-        return createSuccessResponse(
-                babyService.findAllByQueryParametars(searchText, startRangeDate, endRangeDate, page, size));
+        try {
+            return createSuccessResponse(
+                    babyService.findAllByQueryParametars(searchText, startRangeDate, endRangeDate, page, size));
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
+
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        return createSuccessResponse(babyService.findAllList());
+        try {
+            return createSuccessResponse(babyService.findAllList());
+        } catch (Exception e) {
+            return createExceptionResponse(e);
+        }
+
     }
 
 }

@@ -13,7 +13,7 @@ public interface FindAllGiftCardDto {
     LocalDateTime getExpirationDate();
 
     @Value("#{target.used}")
-    Boolean getIsUsed();
+    Boolean getUsed();
 
     @Value("#{target.serial_number}")
     String getSerialNumber();
