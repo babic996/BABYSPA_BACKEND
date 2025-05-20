@@ -1,9 +1,9 @@
 package com.backend.babyspa.v1.controllers;
 
 import com.backend.babyspa.v1.dtos.CreateGiftCardDto;
-import com.backend.babyspa.v1.dtos.FindAllArrangementDto;
 import com.backend.babyspa.v1.dtos.UpdateGiftCardDto;
 import com.backend.babyspa.v1.models.GiftCard;
+import com.backend.babyspa.v1.projections.FindAllGiftCardDto;
 import com.backend.babyspa.v1.services.GiftCardService;
 import com.backend.babyspa.v1.utils.ApiResponse;
 import jakarta.validation.Valid;
@@ -69,13 +69,13 @@ public class GiftCardController extends BaseController {
 
 
     @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<GiftCard>>> findAll(@RequestParam(defaultValue = "0") int page,
-                                                               @RequestParam(defaultValue = "10") int size,
-                                                               @RequestParam(required = false) String serialNumber,
-                                                               @RequestParam(required = false) Boolean isUsed,
-                                                               @RequestParam(required = false) Integer giftCardId,
-                                                               @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-                                                               @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+    public ResponseEntity<ApiResponse<Page<FindAllGiftCardDto>>> findAll(@RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "10") int size,
+                                                                         @RequestParam(required = false) String serialNumber,
+                                                                         @RequestParam(required = false) Boolean isUsed,
+                                                                         @RequestParam(required = false) Integer giftCardId,
+                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
+                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
 
         return createSuccessResponse(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate));
     }

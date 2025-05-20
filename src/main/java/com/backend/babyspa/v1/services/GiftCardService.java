@@ -6,6 +6,7 @@ import com.backend.babyspa.v1.dtos.UpdateGiftCardDto;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Arrangement;
 import com.backend.babyspa.v1.models.GiftCard;
+import com.backend.babyspa.v1.projections.FindAllGiftCardDto;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.repositories.GiftCardRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
@@ -62,14 +63,7 @@ public class GiftCardService {
         }
 
         GiftCard giftCard = findById(updateGiftCardDto.getGiftCardId());
-//        if (!updateGiftCardDto.isUsed()) {
-//            Arrangement arrangement = arrangementRepository.findByGiftCardAndGiftCardIsUsedAndTenantId(updateGiftCardDto.getGiftCardId(), true, TenantContext.getTenant());
-//            if (Objects.nonNull(arrangement)) {
-//                arrangement.setGiftCard(null);
-//                arrangementRepository.save(arrangement);
-//            }
-//        }
-//        giftCard.setUsed(updateGiftCardDto.isUsed());
+        giftCard.setUsed(updateGiftCardDto.isUsed());
         giftCard.setSerialNumber(updateGiftCardDto.getSerialNumber());
         giftCard.setExpirationDate(updateGiftCardDto.getExpirationDate());
 
@@ -110,11 +104,11 @@ public class GiftCardService {
         return giftCardRepository.save(giftCard);
     }
 
-    public Page<GiftCard> findAll(int page, int size, String serialNumber,
-                                  Boolean isUsed, Integer giftCardId, LocalDateTime startDate,
-                                  LocalDateTime endDate) {
+    public Page<FindAllGiftCardDto> findAll(int page, int size, String serialNumber,
+                                            Boolean isUsed, Integer giftCardId, LocalDateTime startDate,
+                                            LocalDateTime endDate) {
 
-        List<GiftCard> giftCards = new ArrayList<GiftCard>();
+        List<FindAllGiftCardDto> giftCards = new ArrayList<FindAllGiftCardDto>();
 
         if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
             startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
@@ -136,7 +130,7 @@ public class GiftCardService {
             start = end = 0;
         }
 
-        final Page<GiftCard> pageItem = new PageImpl<>(giftCards.subList(start, end), pageable,
+        final Page<FindAllGiftCardDto> pageItem = new PageImpl<>(giftCards.subList(start, end), pageable,
                 giftCards.size());
 
         return pageItem;

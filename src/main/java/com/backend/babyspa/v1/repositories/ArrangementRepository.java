@@ -31,15 +31,6 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
     @Query(value = """
             SELECT a.*
             FROM arrangement a
-            LEFT JOIN gift_card gc ON a.gift_card_id = gc.gift_card_id
-            WHERE (gc.gift_card_id = :giftCardId AND gc.usedL = :isUsed)
-            AND (a.tenant_id = :tenantId)
-            """, nativeQuery = true)
-    Arrangement findByGiftCardAndGiftCardIsUsedAndTenantId(int giftCardId, boolean isUsed, String tenantId);
-
-    @Query(value = """
-            SELECT a.*
-            FROM arrangement a
             JOIN status s ON a.status_id = s.status_id
             JOIN baby b ON a.baby_id = b.baby_id
             LEFT JOIN payment_type pt ON a.payment_type_id = pt.payment_type_id
