@@ -35,17 +35,23 @@ public class Arrangement {
     @Column(name = "remaining_term", nullable = false)
     private int remainingTerm;
 
-    @Column(name = "extend_duration_days", nullable = true)
+    @Column(name = "extend_duration_days")
     private Integer extendDurationDays;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    @Column(name = "note", columnDefinition = "TEXT", nullable = true)
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
     @ManyToOne
-    @JoinColumn(name = "discount_id", nullable = true)
+    @JoinColumn(name = "discount_id")
     private Discount discount;
 
     @ManyToOne
@@ -61,11 +67,11 @@ public class Arrangement {
     private ServicePackage servicePackage;
 
     @ManyToOne
-    @JoinColumn(name = "payment_type_id", nullable = true)
+    @JoinColumn(name = "payment_type_id")
     private PaymentType paymentType;
 
     @ManyToOne
-    @JoinColumn(name = "gift_card_id", nullable = true)
+    @JoinColumn(name = "gift_card_id")
     private GiftCard giftCard;
 
     @ManyToOne
@@ -73,8 +79,12 @@ public class Arrangement {
     private User createdByUser;
 
     @ManyToOne
-    @JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id", nullable = true)
+    @JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id")
     private User updatedByUser;
+
+    @ManyToOne
+    @JoinColumn(name = "deleted_by_user_id", referencedColumnName = "user_id")
+    private User deletedByUser;
 
     @Column(name = "tenant_id", nullable = false)
     private String tenantId;

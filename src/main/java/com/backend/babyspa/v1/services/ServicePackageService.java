@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +19,6 @@ import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.ServicePackage;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.repositories.ServicePackageRepository;
-import com.backend.babyspa.v1.utils.SecurityUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -32,7 +32,7 @@ public class ServicePackageService {
     ArrangementRepository arrangementRepository;
 
     @Autowired
-    UserService userService;
+    SecurityUtil securityUtil;
 
     public ServicePackage findById(Integer servicePackageId) throws NotFoundException {
 
@@ -45,7 +45,7 @@ public class ServicePackageService {
     public ServicePackage save(CreateServicePackageDto createServicePackageDto) throws Exception {
         ServicePackage servicePackage = new ServicePackage();
 
-        if (servicePackageRepository.existsByServicePackageName(createServicePackageDto.getServicePackageName())) {
+        if (servicePackageRepository.existsByServicePackageNameAndIsDeleted(createServicePackageDto.getServicePackageName(), false)) {
             throw new Exception(
                     "Postoji paket usluge sa imenom: " + createServicePackageDto.getServicePackageName() + "!");
         }
@@ -55,7 +55,7 @@ public class ServicePackageService {
         servicePackage.setServicePackageDurationDays(createServicePackageDto.getServicePackageDurationDays());
         servicePackage.setTermNumber(createServicePackageDto.getTermNumber());
         servicePackage.setNote(createServicePackageDto.getNote());
-        servicePackage.setCreatedByUser(SecurityUtil.getCurrentUser(userService));
+        servicePackage.setCreatedByUser(securityUtil.getCurrentUser());
 
         return servicePackageRepository.save(servicePackage);
     }
@@ -63,13 +63,13 @@ public class ServicePackageService {
     public ServicePackage update(UpdateServicePackageDto updateServicePackageDto) throws Exception {
         ServicePackage servicePackage = findById(updateServicePackageDto.getServicePackageId());
 
-        if (servicePackageRepository.existsByServicePackageNameAndServicePackageIdNot(
-                updateServicePackageDto.getServicePackageName(), updateServicePackageDto.getServicePackageId())) {
+        if (servicePackageRepository.existsByServicePackageNameAndServicePackageIdNotAndIsDeleted(
+                updateServicePackageDto.getServicePackageName(), updateServicePackageDto.getServicePackageId(), false)) {
             throw new Exception(
                     "Postoji paket usluge sa imenom: " + updateServicePackageDto.getServicePackageName() + "!");
         }
 
-        if (!arrangementRepository.existsByServicePackage(servicePackage)) {
+        if (!arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false)) {
             servicePackage.setServicePackageName(updateServicePackageDto.getServicePackageName());
             servicePackage.setServicePackageDurationDays(updateServicePackageDto.getServicePackageDurationDays());
             servicePackage.setTermNumber(updateServicePackageDto.getTermNumber());
@@ -77,21 +77,21 @@ public class ServicePackageService {
 
         servicePackage.setPrice(updateServicePackageDto.getPrice());
         servicePackage.setNote(updateServicePackageDto.getNote());
-        servicePackage.setUpdatedByUser(SecurityUtil.getCurrentUser(userService));
+        servicePackage.setUpdatedByUser(securityUtil.getCurrentUser());
 
         return servicePackageRepository.save(servicePackage);
     }
 
     public Double findMaxPriceServicePackage() {
 
-        return servicePackageRepository.findMaxPrice();
+        return servicePackageRepository.findMaxPriceAndIsDeleted(false);
     }
 
     @Transactional
     public int delete(int servicePackageId) throws NotFoundException {
 
         ServicePackage servicePackage = findById(servicePackageId);
-        if (arrangementRepository.existsByServicePackage(servicePackage)) {
+        if (arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false)) {
             throw new IllegalArgumentException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
         }
 
@@ -102,13 +102,13 @@ public class ServicePackageService {
 
     public List<ShortDetailsDto> findAllList() {
 
-        return servicePackageRepository.findAllByTenantId(TenantContext.getTenant()).stream()
+        return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
                 .map(x -> buildShortDetailsDtoFromServicePackage(x)).collect(Collectors.toList());
     }
 
     public List<ServicePackage> findAll() {
 
-        return servicePackageRepository.findAllByTenantId(TenantContext.getTenant());
+        return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false);
     }
 
     private ShortDetailsDto buildShortDetailsDtoFromServicePackage(ServicePackage servicePackage) {
@@ -126,14 +126,14 @@ public class ServicePackageService {
         Pageable pageable = PageRequest.of(page, size);
 
         return servicePackageRepository.findAllServicePackageNative(searchText, startPrice, endPrice,
-                TenantContext.getTenant(), pageable);
+                TenantContext.getTenant(), false, pageable);
     }
 
     // ovaj se servis koristi samo za izvjestaje jer se izvjestaji generisu preko
     // schedulera
     public List<ServicePackage> findAllByTenantForReport(String tenantId) {
 
-        return servicePackageRepository.findAllByTenantId(tenantId);
+        return servicePackageRepository.findAllByTenantIdAndIsDeleted(tenantId, false);
     }
 
 }

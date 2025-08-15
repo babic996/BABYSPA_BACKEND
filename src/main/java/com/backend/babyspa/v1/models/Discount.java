@@ -21,28 +21,36 @@ import lombok.Setter;
 @Table(name = "discount")
 public class Discount {
 
-	@Id
-	@Column(name = "discount_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int discountId;
+    @Id
+    @Column(name = "discount_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int discountId;
 
-	@Column(name = "value", nullable = false)
-	private BigDecimal value;
+    @Column(name = "value", nullable = false)
+    private BigDecimal value;
 
-	@Column(name = "is_precentage", nullable = false)
-	private boolean isPrecentage;
+    @Column(name = "is_precentage", nullable = false)
+    private boolean isPrecentage;
 
-	@Column(name = "discount_name", nullable = false)
-	private String discountName;
+    @Column(name = "discount_name", nullable = false)
+    private String discountName;
 
-	@Column(name = "tenant_id", nullable = false)
-	private String tenantId;
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId;
 
-	public Discount(BigDecimal value, boolean isPrecentage, String discountName, String tenantId) {
-		this.value = value;
-		this.isPrecentage = isPrecentage;
-		this.discountName = discountName;
-		this.tenantId = tenantId;
-	}
+    public Discount(BigDecimal value, boolean isPrecentage, String discountName, String tenantId) {
+        this.value = value;
+        this.isPrecentage = isPrecentage;
+        this.discountName = discountName;
+        this.tenantId = tenantId;
+    }
+
+    @Override
+    public String toString() {
+        return "Id: " + discountId +
+                ", Vrijednost: " + value +
+                ", Ime popusta: " + discountName +
+                ", Popust u procentima: " + (isPrecentage ? "DA" : "NE");
+    }
 
 }

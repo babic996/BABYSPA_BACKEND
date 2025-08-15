@@ -1,6 +1,7 @@
 package com.backend.babyspa.v1.services;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.backend.babyspa.v1.models.*;
+import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +27,6 @@ import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.repositories.ReservationRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
-import com.backend.babyspa.v1.utils.SecurityUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -59,6 +60,12 @@ public class ArrangementService {
     @Autowired
     GiftCardService giftCardService;
 
+    @Autowired
+    ArrangementAudService arrangementAudService;
+
+    @Autowired
+    SecurityUtil securityUtil;
+
     private final String createdStatus = "created";
 
     public Arrangement findById(int arrangementId) throws NotFoundException {
@@ -67,6 +74,7 @@ public class ArrangementService {
                 .orElseThrow(() -> new NotFoundException("Nije pronadjen aranzman sa id: " + arrangementId + "!"));
     }
 
+    @Transactional
     public Arrangement save(CreateArrangementDto createArrangementDto) throws Exception {
 
         Arrangement arrangement = new Arrangement();
@@ -80,7 +88,7 @@ public class ArrangementService {
             arrangement.setDiscount(discount);
             if (discount.isPrecentage()) {
                 BigDecimal discountValue = servicePackage.getPrice().multiply(discount.getValue())
-                        .divide(new BigDecimal(100));
+                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                 arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
 
             } else {
@@ -99,9 +107,12 @@ public class ArrangementService {
         arrangement.setRemainingTerm(servicePackage.getTermNumber());
         arrangement.setServicePackage(servicePackage);
         arrangement.setStatus(status);
-        arrangement.setCreatedByUser(SecurityUtil.getCurrentUser(userService));
+        arrangement.setCreatedByUser(securityUtil.getCurrentUser());
 
-        return arrangementRepository.save(arrangement);
+        arrangementRepository.save(arrangement);
+        arrangementAudService.save(arrangement, securityUtil.getCurrentUser(), UserActionType.create);
+
+        return arrangement;
     }
 
     @Transactional
@@ -110,10 +121,11 @@ public class ArrangementService {
         Arrangement arrangement = findById(updateArrangementDto.getArrangementId());
         Baby baby = new Baby();
         ServicePackage servicePackage = new ServicePackage();
+        Arrangement arrangementBeforeUpdate = arrangement;
 
         // ako postoji rezervacija moze mijenjati samo status, discount i paymentType
 
-        if (reservationRepository.existsByArrangement(arrangement)) {
+        if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
             baby = arrangement.getBaby();
             servicePackage = arrangement.getServicePackage();
             arrangement.setRemainingTerm(arrangement.getRemainingTerm());
@@ -146,7 +158,7 @@ public class ArrangementService {
             arrangement.setDiscount(discount);
             if (discount.isPrecentage()) {
                 BigDecimal discountValue = servicePackage.getPrice().multiply(discount.getValue())
-                        .divide(new BigDecimal(100));
+                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                 arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
 
             } else {
@@ -188,9 +200,10 @@ public class ArrangementService {
         arrangement.setNote(updateArrangementDto.getNote());
         arrangement.setStatus(status);
         arrangement.setExtendDurationDays(updateArrangementDto.getExtendDurationDays());
-        arrangement.setUpdatedByUser(SecurityUtil.getCurrentUser(userService));
+        arrangement.setUpdatedByUser(securityUtil.getCurrentUser());
 
         arrangementRepository.save(arrangement);
+        arrangementAudService.save(arrangementBeforeUpdate, securityUtil.getCurrentUser(), UserActionType.update);
         return buildFindAllArrangementDtoFromArrangement(arrangement);
     }
 
@@ -209,23 +222,27 @@ public class ArrangementService {
     }
 
     @Transactional
-    public int delete(int arrangementId) throws NotFoundException, Exception {
+    public int delete(int arrangementId) throws Exception {
 
         Arrangement arrangement = findById(arrangementId);
 
-        if (reservationRepository.existsByArrangement(arrangement)) {
+        if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
 
             throw new Exception("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
         }
 
-        arrangementRepository.delete(arrangement);
+        arrangement.setDeleted(true);
+        arrangement.setDeletedAt(LocalDateTime.now());
+        arrangement.setDeletedByUser(securityUtil.getCurrentUser());
+        arrangementRepository.save(arrangement);
+        arrangementAudService.save(arrangement, securityUtil.getCurrentUser(), UserActionType.delete);
         return arrangementId;
     }
 
     public boolean existsByServicePackage(int servicePackageId) {
         ServicePackage servicePackage = servicePackageService.findById(servicePackageId);
 
-        return arrangementRepository.existsByServicePackage(servicePackage);
+        return arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false);
     }
 
     public Page<FindAllArrangementDto> findAll(int page, int size, Integer babyId, Integer statusId,
@@ -243,11 +260,11 @@ public class ArrangementService {
 
         if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
             arrangement = arrangementRepository.findAllArrangementNative(statusId, babyId, paymentTypeId, giftCardId, startPrice,
-                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant());
+                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant(), false);
         } else {
             arrangement = arrangementRepository.findAllArrangementNativeWithStartDateAndDate(statusId, babyId,
                     paymentTypeId, giftCardId, startPrice, endPrice, remaingingTerm, servicePackageId, arrangementId, startDate,
-                    endDate, TenantContext.getTenant());
+                    endDate, TenantContext.getTenant(), false);
         }
 
         arrangementDto = arrangement.stream().map(x -> buildFindAllArrangementDtoFromArrangement(x))
@@ -280,11 +297,11 @@ public class ArrangementService {
 
         if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
             price = arrangementRepository.findPriceForAllArrangementNative(statusId, babyId, paymentTypeId, giftCardId, startPrice,
-                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant());
+                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant(), false);
         } else {
             price = arrangementRepository.findPriceForAllArrangementNativeWithStartDateAndDate(statusId, babyId,
                     paymentTypeId, giftCardId, startPrice, endPrice, remaingingTerm, servicePackageId, arrangementId, startDate,
-                    endDate, TenantContext.getTenant());
+                    endDate, TenantContext.getTenant(), false);
         }
 
         return price;
@@ -292,11 +309,9 @@ public class ArrangementService {
 
     public List<ShortDetailsDto> findAllArrangementList() {
 
-        List<ShortDetailsDto> arrangementList = arrangementRepository
-                .findByRemainingTermGreaterThanAndTenantId(0, TenantContext.getTenant()).stream()
+        return arrangementRepository
+                .findByRemainingTermGreaterThanAndTenantIdAndIsDeleted(0, TenantContext.getTenant(), false).stream()
                 .map(x -> buildShortDetailsFromArrangement(x)).collect(Collectors.toList());
-
-        return arrangementList;
     }
 
     private ShortDetailsDto buildShortDetailsFromArrangement(Arrangement arrangement) {

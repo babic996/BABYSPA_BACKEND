@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,6 @@ import com.backend.babyspa.v1.models.Reservation;
 import com.backend.babyspa.v1.models.ServicePackage;
 import com.backend.babyspa.v1.models.Status;
 import com.backend.babyspa.v1.repositories.ReservationRepository;
-import com.backend.babyspa.v1.utils.SecurityUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -48,7 +48,10 @@ public class ReservationService {
     ServicePackageDailyReportService servicePackageDailyReportService;
 
     @Autowired
-    UserService userService;
+    ReservationHistoryStatusService reservationHistoryStatusService;
+
+    @Autowired
+    SecurityUtil securityUtil;
 
     private final String reservationReserved = "term_reserved";
     private final String reservationUsed = "term_used";
@@ -64,7 +67,7 @@ public class ReservationService {
     public List<ReservationShortInfo> findByArrangementId(int arrangementId) throws NotFoundException {
 
         Arrangement arrangement = arrangementService.findById(arrangementId);
-        List<ReservationShortInfo> reservationShortInfoList = reservationRepository.findByArrangement(arrangement)
+        List<ReservationShortInfo> reservationShortInfoList = reservationRepository.findByArrangementAndIsDeleted(arrangement, false)
                 .stream()
                 .map(x -> new ReservationShortInfo(x.getStartDate(), x.getEndDate(), x.getStatus().getStatusName()))
                 .collect(Collectors.toList());
@@ -73,8 +76,8 @@ public class ReservationService {
 
     }
 
-    @Transactional
-    public ReservationFindAllDto save(CreateReservationDto createReservationDto) throws NotFoundException, Exception {
+    @Transactional(rollbackOn = Exception.class)
+    public ReservationFindAllDto save(CreateReservationDto createReservationDto) throws Exception {
 
         Arrangement arrangement = arrangementService.findById(createReservationDto.getArrangementId());
         Status status = statusService.findByStatusCode(reservationReserved);
@@ -84,9 +87,9 @@ public class ReservationService {
             throw new Exception("Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
         }
 
-        if (reservationRepository.existsByArrangement(arrangement)) {
+        if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
             Reservation firstReservation = reservationRepository
-                    .findFirstByArrangementOrderByReservationIdAsc(arrangement)
+                    .findFirstByArrangementAndIsDeletedOrderByReservationIdAsc(arrangement, false)
                     .orElseThrow(() -> new Exception("Nije pronađena prva rezervacija za aranžman čiji je Id: "
                             + arrangement.getArrangementId() + "!"));
             if ((firstReservation.getStartDate().plusDays(arrangement.getServicePackage()
@@ -103,7 +106,7 @@ public class ReservationService {
                 createReservationDto.getStartDate().plusMinutes(createReservationDto.getDurationReservation()));
         reservation.setStatus(status);
         reservation.setNote(createReservationDto.getNote());
-        reservation.setCreatedByUser(SecurityUtil.getCurrentUser(userService));
+        reservation.setCreatedByUser(securityUtil.getCurrentUser());
         arrangementService.decreaseRemainingTerm(arrangement);
 
         reservationRepository.save(reservation);
@@ -111,15 +114,17 @@ public class ReservationService {
         return buildReservationFindAllDtoFromReservation(reservation);
     }
 
-    public ReservationFindAllDto update(UpdateReservationDto updateReservationDto) throws NotFoundException, Exception {
+    @Transactional(rollbackOn = Exception.class)
+    public ReservationFindAllDto update(UpdateReservationDto updateReservationDto) throws Exception {
 
         Status status = statusService.findById(updateReservationDto.getStatusId());
         Reservation reservation = findById(updateReservationDto.getReservationId());
+        Status statusBeforeUpdate = reservation.getStatus();
 
         if (reservation.getStatus().getStatusCode().equals(reservationCanceled)
                 && reservation.getArrangement().getRemainingTerm() == 0
                 && !status.getStatusCode().equals(reservationCanceled)) {
-            throw new Exception(
+            throw new NotFoundException(
                     "Nije moguće ažurirati rezervaciju jer bi broj preostalih termina aranžmana bio manji od 0!");
         } else {
             if (!reservation.getStatus().getStatusCode().equals(reservationCanceled)
@@ -135,20 +140,25 @@ public class ReservationService {
         }
 
         reservation.setNote(updateReservationDto.getNote());
-        reservation.setUpdatedByUser(SecurityUtil.getCurrentUser(userService));
+        reservation.setUpdatedByUser(securityUtil.getCurrentUser());
 
         reservationRepository.save(reservation);
+        reservationHistoryStatusService.save(reservation, statusBeforeUpdate, securityUtil.getCurrentUser());
 
         return buildReservationFindAllDtoFromReservation(reservation);
     }
 
-    @Transactional
+    @Transactional(rollbackOn = NotFoundException.class)
     public int delete(int reservationId) throws NotFoundException {
 
         Reservation reservation = findById(reservationId);
 
         arrangementService.increaseRemainingTerm(reservation.getArrangement());
-        reservationRepository.delete(reservation);
+        reservation.setDeleted(true);
+        reservation.setDeletedByUser(securityUtil.getCurrentUser());
+        reservation.setDeletedAt(LocalDateTime.now());
+
+        reservationRepository.save(reservation);
 
         return reservationId;
     }
@@ -157,17 +167,19 @@ public class ReservationService {
 
         Reservation reservation = findById(reservationId);
         Status status = statusService.findByStatusCode(reservationCanceled);
+        Status statusBeforeUpdate = reservation.getStatus();
 
         arrangementService.increaseRemainingTerm(reservation.getArrangement());
         reservation.setStatus(status);
         reservationRepository.save(reservation);
+        reservationHistoryStatusService.save(reservation, statusBeforeUpdate, securityUtil.getCurrentUser());
 
         return reservationId;
     }
 
     public List<ReservationFindAllDto> findAllList() {
 
-        return reservationRepository.findByTenantId(TenantContext.getTenant()).stream()
+        return reservationRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
                 .map(x -> buildReservationFindAllDtoFromReservation(x)).collect(Collectors.toList());
     }
 
@@ -175,7 +187,7 @@ public class ReservationService {
 
         Arrangement arrangement = arrangementService.findById(arrangementId);
 
-        return reservationRepository.findByArrangement(arrangement);
+        return reservationRepository.findByArrangementAndIsDeleted(arrangement, false);
     }
 
     @Transactional
@@ -185,7 +197,7 @@ public class ReservationService {
         if (!statuses.isEmpty()) {
             statuses.forEach(status -> {
                 List<Object[]> usegesPerBaby = reservationRepository.countReservationPerBabyAndStatus(date,
-                        status.getStatusId(), tenantId);
+                        status.getStatusId(), tenantId, false);
                 if (Objects.nonNull(usegesPerBaby)) {
                     usegesPerBaby.forEach(useges -> {
                         ReservationDailyReportDto reservationDailyReportDto = new ReservationDailyReportDto();
@@ -201,14 +213,14 @@ public class ReservationService {
 
     }
 
-    @Transactional
+    @Transactional(rollbackOn = NotFoundException.class)
     public void updateReservationWithStatusCreatedToStatusUsed() {
 
         LocalDateTime dayBefore = LocalDateTime.now().minusDays(1);
         Status statusReservationReserved = statusService.findByStatusCode(reservationReserved);
         Status statusReservationUsed = statusService.findByStatusCode(reservationUsed);
 
-        reservationRepository.findByStartDateAndStatusCode(dayBefore, statusReservationReserved.getStatusId()).stream()
+        reservationRepository.findByStartDateAndStatusCode(dayBefore, statusReservationReserved.getStatusId(), false).stream()
                 .forEach(reservation -> updateReservationStatus(reservation, statusReservationUsed));
     }
 
@@ -225,7 +237,7 @@ public class ReservationService {
             servicePackages.forEach(servicePackage -> {
                 ServicePackageDailyReportDto servicePackageDailyReportDto = new ServicePackageDailyReportDto();
                 int usedPackages = reservationRepository.countServicePackageByStartDateAndServicePackageId(date,
-                        servicePackage.getServicePackageId(), tenantId);
+                        servicePackage.getServicePackageId(), tenantId, false);
                 servicePackageDailyReportDto.setNumberOfUsedPackages(usedPackages);
                 servicePackageDailyReportDto.setDate(date);
                 servicePackageDailyReportDto.setServicePackage(servicePackage);
@@ -254,7 +266,7 @@ public class ReservationService {
 
         Arrangement arrangement = arrangementService.findById(arrangementId);
 
-        return reservationRepository.existsByArrangement(arrangement);
+        return reservationRepository.existsByArrangementAndIsDeleted(arrangement, false);
     }
 
     @Transactional
@@ -266,7 +278,7 @@ public class ReservationService {
 
             LocalDate currentDate = LocalDate.now();
             List<LocalDate> allDatesFromReservation = reservationRepository
-                    .findDistinctReservationDates(currentDate.atStartOfDay(), tenantId).stream().map(x -> x.getDate())
+                    .findDistinctReservationDates(currentDate.atStartOfDay(), tenantId, false).stream().map(x -> x.getDate())
                     .collect(Collectors.toList());
 
             allDatesFromReservation.forEach(x -> {
@@ -285,11 +297,4 @@ public class ReservationService {
             generateReservationReport(date, tenantId);
         }
     }
-
-    @Transactional
-    public void deleteByArrangement(Arrangement arrangement) {
-
-        reservationRepository.deleteByArrangement(arrangement);
-    }
-
 }
