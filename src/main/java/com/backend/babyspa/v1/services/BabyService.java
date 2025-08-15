@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,6 @@ import com.backend.babyspa.v1.models.Baby;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.repositories.BabyRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
-import com.backend.babyspa.v1.utils.SecurityUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -34,7 +34,7 @@ public class BabyService {
     ArrangementRepository arrangementRepository;
 
     @Autowired
-    UserService userService;
+    SecurityUtil securityUtil;
 
     public Baby findById(Integer babyId) throws NotFoundException {
 
@@ -45,8 +45,8 @@ public class BabyService {
     public Baby save(CreateBabyDto createBabyDto) throws Exception {
         Baby baby = new Baby();
 
-        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantId(createBabyDto.getPhoneNumber(),
-                createBabyDto.getBabyName(), TenantContext.getTenant())) {
+        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndIsDeleted(createBabyDto.getPhoneNumber(),
+                createBabyDto.getBabyName(), TenantContext.getTenant(), false)) {
             throw new Exception("Ova beba je već unesena u sistem!");
         }
 
@@ -57,7 +57,7 @@ public class BabyService {
         baby.setNote(createBabyDto.getNote());
         baby.setNumberOfMonths(createBabyDto.getNumberOfMonths());
         baby.setPhoneNumber(createBabyDto.getPhoneNumber());
-        baby.setCreatedByUser(SecurityUtil.getCurrentUser(userService));
+        baby.setCreatedByUser(securityUtil.getCurrentUser());
 
         return babyRepository.save(baby);
     }
@@ -66,8 +66,8 @@ public class BabyService {
 
         Baby baby = findById(updateBabyDto.getBabyId());
 
-        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNot(updateBabyDto.getPhoneNumber(),
-                updateBabyDto.getBabyName(), TenantContext.getTenant(), updateBabyDto.getBabyId())) {
+        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNotAndIsDeleted(updateBabyDto.getPhoneNumber(),
+                updateBabyDto.getBabyName(), TenantContext.getTenant(), updateBabyDto.getBabyId(), false)) {
             throw new Exception("Ova beba je već unesena u sistem!");
         }
 
@@ -78,7 +78,7 @@ public class BabyService {
         baby.setNote(updateBabyDto.getNote());
         baby.setNumberOfMonths(updateBabyDto.getNumberOfMonths());
         baby.setPhoneNumber(updateBabyDto.getPhoneNumber());
-        baby.setUpdatedByUser(SecurityUtil.getCurrentUser(userService));
+        baby.setUpdatedByUser(securityUtil.getCurrentUser());
 
         return babyRepository.save(baby);
 
@@ -88,11 +88,16 @@ public class BabyService {
     public int delete(int babyId) throws NotFoundException {
 
         Baby baby = findById(babyId);
-        if (arrangementRepository.existsByBaby(baby)) {
+
+        if (arrangementRepository.existsByBabyAndIsDeleted(baby, false)) {
             throw new IllegalArgumentException("Nije moguće obrisati bebu ako postoji aranžman kojem je dodijeljena.");
         }
 
-        babyRepository.delete(baby);
+        baby.setDeleted(true);
+        baby.setDeletedAt(LocalDateTime.now());
+        baby.setDeletedByUser(securityUtil.getCurrentUser());
+
+        babyRepository.save(baby);
         return babyId;
     }
 
@@ -108,20 +113,20 @@ public class BabyService {
         Pageable pageable = PageRequest.of(page, size);
 
         if (Objects.isNull(start) && Objects.isNull(end)) {
-            return babyRepository.findAllNativeWithoutDate(searchText, TenantContext.getTenant(), pageable);
+            return babyRepository.findAllNativeWithoutDate(searchText, TenantContext.getTenant(), false, pageable);
         } else {
-            return babyRepository.findAllNativeWithDate(searchText, start, end, TenantContext.getTenant(), pageable);
+            return babyRepository.findAllNativeWithDate(searchText, start, end, TenantContext.getTenant(), false, pageable);
         }
     }
 
     public List<ShortDetailsDto> findAllList() {
 
-        return babyRepository.findByTenantId(TenantContext.getTenant()).stream()
+        return babyRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
                 .map(x -> buildShortDetailsDtoFromBaby(x)).collect(Collectors.toList());
     }
 
     public void updateMonthsForAll() {
-        babyRepository.updateAllNumberOfMonths(LocalDateTime.now());
+        babyRepository.updateAllNumberOfMonths(LocalDateTime.now(), false);
     }
 
     private ShortDetailsDto buildShortDetailsDtoFromBaby(Baby baby) {

@@ -29,10 +29,7 @@ import com.backend.babyspa.v1.dtos.UserInfoDto;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Role;
 import com.backend.babyspa.v1.models.User;
-import com.backend.babyspa.v1.models.UserRole;
-import com.backend.babyspa.v1.models.UserRoleKey;
 import com.backend.babyspa.v1.repositories.UserRepository;
-import com.backend.babyspa.v1.repositories.UserRoleRepository;
 import com.backend.babyspa.v1.utils.JwtUtil;
 
 import jakarta.transaction.Transactional;
@@ -54,9 +51,6 @@ public class UserService {
 
     @Autowired
     JwtUtil jwtUtil;
-
-    @Autowired
-    UserRoleRepository userRoleRepository;
 
     @Autowired
     RoleService roleService;

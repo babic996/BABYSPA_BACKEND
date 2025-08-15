@@ -21,25 +21,33 @@ import lombok.Setter;
 @Table(name = "status")
 public class Status {
 
-	@Id
-	@Column(name = "status_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int statusId;
+    @Id
+    @Column(name = "status_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int statusId;
 
-	@Column(name = "status_name", nullable = false)
-	private String statusName;
+    @Column(name = "status_name", nullable = false)
+    private String statusName;
 
-	@Column(name = "status_code", nullable = false)
-	private String statusCode;
+    @Column(name = "status_code", nullable = false)
+    private String statusCode;
 
-	@ManyToOne
-	@JoinColumn(name = "status_type_id", nullable = false)
-	private StatusType statusType;
+    @ManyToOne
+    @JoinColumn(name = "status_type_id", nullable = false)
+    private StatusType statusType;
 
-	public Status(String statusName, String statusCode, StatusType statusType) {
+    public Status(String statusName, String statusCode, StatusType statusType) {
 
-		this.statusName = statusName;
-		this.statusCode = statusCode;
-		this.statusType = statusType;
-	}
+        this.statusName = statusName;
+        this.statusCode = statusCode;
+        this.statusType = statusType;
+    }
+
+    @Override
+    public String toString() {
+        return "Id: " + statusId +
+                ", Ime: " + statusName +
+                ", Kod: " + statusCode +
+                ", Tip statusa: " + statusType.getStatusTypeCode();
+    }
 }

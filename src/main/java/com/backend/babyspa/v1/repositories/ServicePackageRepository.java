@@ -15,24 +15,25 @@ import com.backend.babyspa.v1.models.ServicePackage;
 @Repository
 public interface ServicePackageRepository extends JpaRepository<ServicePackage, Integer> {
 
-	boolean existsByServicePackageName(String servicePackageName);
+    boolean existsByServicePackageNameAndIsDeleted(String servicePackageName, boolean isDeleted);
 
-	boolean existsByServicePackageNameAndServicePackageIdNot(String servicePackageName, int servicePackageId);
+    boolean existsByServicePackageNameAndServicePackageIdNotAndIsDeleted(String servicePackageName, int servicePackageId, boolean isDeleted);
 
-	@Query(value = "SELECT MAX(s.price) FROM service_package s", nativeQuery = true)
-	Double findMaxPrice();
+    @Query(value = "SELECT MAX(s.price) FROM service_package s WHERE s.is_deleted = :isDeleted", nativeQuery = true)
+    Double findMaxPriceAndIsDeleted(@Param("isDeleted") boolean isDeleted);
 
-	@Query(value = """
-			    SELECT * FROM service_package sp
-			    WHERE (:searchText IS NULL OR LOWER(sp.service_package_name) LIKE LOWER(CONCAT('%', :searchText, '%')))
-			    AND (sp.price BETWEEN COALESCE(:priceStart, 0) AND COALESCE(:priceEnd, 99999999) OR (:priceStart IS NULL AND :priceEnd IS NULL))
-			    AND sp.tenant_id = :tenantId
-			    ORDER BY sp.service_package_id DESC
-			""", nativeQuery = true)
-	Page<ServicePackage> findAllServicePackageNative(@Param("searchText") String searchText,
-			@Param("priceStart") BigDecimal priceStart, @Param("priceEnd") BigDecimal priceEnd,
-			@Param("tenantId") String tenantId, Pageable pageable);
+    @Query(value = """
+                SELECT * FROM service_package sp
+                WHERE (:searchText IS NULL OR LOWER(sp.service_package_name) LIKE LOWER(CONCAT('%', :searchText, '%')))
+                AND (sp.price BETWEEN COALESCE(:priceStart, 0) AND COALESCE(:priceEnd, 99999999) OR (:priceStart IS NULL AND :priceEnd IS NULL))
+                AND sp.tenant_id = :tenantId
+                AND sp.is_deleted = :isDeleted
+                ORDER BY sp.service_package_id DESC
+            """, nativeQuery = true)
+    Page<ServicePackage> findAllServicePackageNative(@Param("searchText") String searchText,
+                                                     @Param("priceStart") BigDecimal priceStart, @Param("priceEnd") BigDecimal priceEnd,
+                                                     @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted, Pageable pageable);
 
-	List<ServicePackage> findAllByTenantId(String tenantId);
+    List<ServicePackage> findAllByTenantIdAndIsDeleted(String tenantId, boolean isDeleted);
 
 }

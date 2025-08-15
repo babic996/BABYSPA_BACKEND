@@ -90,7 +90,7 @@ public class GiftCardService {
     @Transactional
     public int delete(int giftCardId) {
         GiftCard giftCard = findById(giftCardId);
-        if (arrangementRepository.existsByGiftCard(giftCard)) {
+        if (arrangementRepository.existsByGiftCardAndIsDeleted(giftCard, false)) {
             throw new IllegalArgumentException("Ova kartica je dodijeljena aranžmanu i nije moguće njeno brisanje!");
         }
         giftCardRepository.delete(giftCard);

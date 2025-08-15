@@ -17,16 +17,13 @@ import com.backend.babyspa.v1.models.ServicePackage;
 @Repository
 public interface ArrangementRepository extends JpaRepository<Arrangement, Integer> {
 
-    @Query(value = "SELECT * FROM arrangement ORDER BY arrangement_id DESC", nativeQuery = true)
-    List<Arrangement> findAllNative();
+    List<Arrangement> findByRemainingTermGreaterThanAndTenantIdAndIsDeleted(int remainingTerm, String tenantId, boolean isDeleted);
 
-    List<Arrangement> findByRemainingTermGreaterThanAndTenantId(int remainingTerm, String tenantId);
+    boolean existsByServicePackageAndIsDeleted(ServicePackage servicePackage, boolean isDeleted);
 
-    boolean existsByServicePackage(ServicePackage servicePackage);
+    boolean existsByBabyAndIsDeleted(Baby baby, boolean isDeleted);
 
-    boolean existsByBaby(Baby baby);
-
-    boolean existsByGiftCard(GiftCard giftCard);
+    boolean existsByGiftCardAndIsDeleted(GiftCard giftCard, boolean isDeleted);
 
     @Query(value = """
             SELECT a.*
@@ -45,13 +42,14 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
             AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
             AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
             AND (a.tenant_id = :tenantId)
+            AND (a.is_deleted = :isDeleted)
             ORDER BY a.arrangement_id DESC
             """, nativeQuery = true)
     List<Arrangement> findAllArrangementNative(@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
                                                @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId, @Param("startPrice") BigDecimal startPrice,
                                                @Param("endPrice") BigDecimal endPrice, @Param("remainingTerm") Integer remainingTerm,
                                                @Param("servicePackageId") Integer servicePackageId, @Param("arrangementId") Integer arrangementId,
-                                               @Param("tenantId") String tenantId);
+                                               @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
 
     @Query(value = """
             SELECT a.*
@@ -71,6 +69,7 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
             AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
             AND (a.created_at >= :startDate AND a.created_at <= :endDate)
             AND (a.tenant_id = :tenantId)
+            AND (a.is_deleted = :isDeleted)
             ORDER BY a.arrangement_id DESC
             """, nativeQuery = true)
     List<Arrangement> findAllArrangementNativeWithStartDateAndDate(@Param("statusId") Integer statusId,
@@ -78,7 +77,7 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
                                                                    @Param("startPrice") BigDecimal startPrice, @Param("endPrice") BigDecimal endPrice,
                                                                    @Param("remainingTerm") Integer remainingTerm, @Param("servicePackageId") Integer servicePackageId,
                                                                    @Param("arrangementId") Integer arrangementId, @Param("startDate") LocalDateTime startDate,
-                                                                   @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId);
+                                                                   @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
 
     @Query(value = """
             SELECT SUM(a.price)
@@ -97,12 +96,13 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
             AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
             AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
             AND (a.tenant_id = :tenantId)
+            AND (a.is_deleted = :isDeleted)
             """, nativeQuery = true)
     BigDecimal findPriceForAllArrangementNative(@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
                                                 @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId, @Param("startPrice") BigDecimal startPrice,
                                                 @Param("endPrice") BigDecimal endPrice, @Param("remainingTerm") Integer remainingTerm,
                                                 @Param("servicePackageId") Integer servicePackageId, @Param("arrangementId") Integer arrangementId,
-                                                @Param("tenantId") String tenantId);
+                                                @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
 
     @Query(value = """
             SELECT SUM(a.price)
@@ -122,11 +122,12 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Intege
             AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
             AND (a.created_at >= :startDate AND a.created_at <= :endDate)
             AND (a.tenant_id = :tenantId)
+            AND (a.is_deleted = :isDeleted)
             """, nativeQuery = true)
     BigDecimal findPriceForAllArrangementNativeWithStartDateAndDate(@Param("statusId") Integer statusId,
                                                                     @Param("babyId") Integer babyId, @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId,
                                                                     @Param("startPrice") BigDecimal startPrice, @Param("endPrice") BigDecimal endPrice,
                                                                     @Param("remainingTerm") Integer remainingTerm, @Param("servicePackageId") Integer servicePackageId,
                                                                     @Param("arrangementId") Integer arrangementId, @Param("startDate") LocalDateTime startDate,
-                                                                    @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId);
+                                                                    @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
 }

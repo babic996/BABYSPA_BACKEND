@@ -1,10 +1,8 @@
 package com.backend.babyspa.v1.models;
 
+import com.backend.babyspa.v1.utils.DateTimeUtil;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,6 +13,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "gift_card")
+@EqualsAndHashCode(of = "serialNumber")
 public class GiftCard {
 
     @Id
@@ -35,16 +34,11 @@ public class GiftCard {
     private String tenantId;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GiftCard giftCard)) return false;
-
-        return serialNumber != null && serialNumber.equals(giftCard.serialNumber);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(serialNumber);
+    public String toString() {
+        return "Id: " + giftCardId +
+                ", Serijski broj: " + serialNumber +
+                ", Datum isteka: " + (Objects.nonNull(expirationDate) ? DateTimeUtil.formatLocalDateTime(expirationDate) : "") +
+                ", Iskorištena: " + (used ? "DA" : "NE");
     }
 
 }
