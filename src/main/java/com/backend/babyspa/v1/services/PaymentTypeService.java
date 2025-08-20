@@ -16,7 +16,7 @@ public class PaymentTypeService {
     @Autowired
     PaymentTypeRepository paymentTypeRepository;
 
-    public PaymentType findById(Integer paymentTypeId) throws NotFoundException {
+    public PaymentType findById(Integer paymentTypeId) {
 
         return paymentTypeRepository.findById(paymentTypeId)
                 .orElseThrow(() -> new NotFoundException("Nije pronađen tip plaćanja sa ID: " + paymentTypeId + "!"));

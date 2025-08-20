@@ -34,14 +34,9 @@ public class ServicePackageController extends BaseController {
     ServicePackageService servicePackageService;
 
     @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<ServicePackage>> findById(@RequestParam Integer servicePackageId) throws NotFoundException {
+    public ResponseEntity<ApiResponse<ServicePackage>> findById(@RequestParam Integer servicePackageId) {
 
-        try {
-            return createSuccessResponse(servicePackageService.findById(servicePackageId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findById(servicePackageId)));
     }
 
     @PostMapping("/save")
@@ -52,13 +47,7 @@ public class ServicePackageController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            ServicePackage servicePackage = servicePackageService.save(createServicePackageDto);
-            return createSuccessResponse(servicePackage);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.save(createServicePackageDto)));
     }
 
     @PutMapping("/update")
@@ -68,33 +57,20 @@ public class ServicePackageController extends BaseController {
         if (hasErrors(bindingResult)) {
             return createErrorResponse(bindingResult);
         }
-        try {
-            ServicePackage servicePackage = servicePackageService.update(updateServicePackageDto);
-            return createSuccessResponse(servicePackage);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.update(updateServicePackageDto)));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int servicePackageId) {
 
-        try {
-            int deletedServicePackageId = servicePackageService.delete(servicePackageId);
-            return createSuccessResponse(deletedServicePackageId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.delete(servicePackageId)));
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        try {
-            return createSuccessResponse(servicePackageService.findAllList());
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findAllList()));
     }
 
     @GetMapping("/find-all")
@@ -103,21 +79,12 @@ public class ServicePackageController extends BaseController {
                                                                      @RequestParam(required = false) BigDecimal startPrice,
                                                                      @RequestParam(required = false) BigDecimal endPrice) {
 
-        try {
-            return createSuccessResponse(servicePackageService.findAll(page, size, searchText, startPrice, endPrice));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findAll(page, size, searchText, startPrice, endPrice)));
     }
 
     @GetMapping("/find-max-price")
     public ResponseEntity<ApiResponse<Double>> findMaxPrice() {
 
-        try {
-            return createSuccessResponse(servicePackageService.findMaxPriceServicePackage());
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findMaxPriceServicePackage()));
     }
-
 }

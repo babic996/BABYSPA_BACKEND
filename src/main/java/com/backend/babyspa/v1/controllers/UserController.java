@@ -1,5 +1,6 @@
 package com.backend.babyspa.v1.controllers;
 
+import com.backend.babyspa.v1.models.Reservation;
 import com.backend.babyspa.v1.services.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,31 +43,19 @@ public class UserController extends BaseController {
     @GetMapping("/find-by-id")
     public ResponseEntity<ApiResponse<User>> findById(@RequestParam int userId) {
 
-        try {
-            return createSuccessResponse(userService.findById(userId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userService.findById(userId)));
     }
 
     @GetMapping("/find-user-info-by-id")
     public ResponseEntity<ApiResponse<UserInfoDto>> findUserInfoByUserId(@RequestParam int userId) {
 
-        try {
-            return createSuccessResponse(userService.findUserInfoByUserId(userId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userService.findUserInfoByUserId(userId)));
     }
 
     @GetMapping("/find-all-user-info")
     public ResponseEntity<ApiResponse<List<UserInfoDto>>> findUserInfoByUserId(@RequestParam(required = false) List<String> excludedRoleNames) {
 
-        try {
-            return createSuccessResponse(userService.findAllUsers(excludedRoleNames));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userService.findAllUsers(excludedRoleNames)));
     }
 
     @PostMapping("/register")
@@ -77,13 +66,7 @@ public class UserController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            User registerUser = userService.register(registerNewUserDto, authentication);
-            return createSuccessResponse(registerUser);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(userService.register(registerNewUserDto, authentication)));
     }
 
     @PostMapping("/add-new-tenant")
@@ -94,13 +77,7 @@ public class UserController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            User registerUser = userService.addNewTenantUser(addNewTenantUserDto, authentication);
-            return createSuccessResponse(registerUser);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(userService.addNewTenantUser(addNewTenantUserDto, authentication)));
     }
 
     @PostMapping("/login")
@@ -111,24 +88,14 @@ public class UserController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            LoginResponseDto loginResponseDto = userService.loginUser(loginDto);
-            return createSuccessResponse(loginResponseDto);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(userService.loginUser(loginDto)));
     }
 
     @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody ChangePasswordDto changePasswordDto,
                                                               Authentication authentication) {
 
-        try {
-            return createSuccessResponse(userService.changePassword(changePasswordDto, authentication));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userService.changePassword(changePasswordDto, authentication)));
     }
 
     @PutMapping("/update")
@@ -139,21 +106,13 @@ public class UserController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            return createSuccessResponse(userService.updateUser(updateUserDto, authentication));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userService.updateUser(updateUserDto, authentication)));
     }
 
     @PutMapping("/assign-roles")
     public ResponseEntity<ApiResponse<String>> assignRoles(@RequestBody AssignRolesDto assignRolesDto,
                                                            Authentication authentication) {
 
-        try {
-            return createSuccessResponse(userRoleService.assignRolesToUser(assignRolesDto, authentication));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(userRoleService.assignRolesToUser(assignRolesDto, authentication)));
     }
 }

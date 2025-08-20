@@ -35,13 +35,9 @@ public class BabyController extends BaseController {
     BabyService babyService;
 
     @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<Baby>> findById(@RequestParam Integer babyId) throws NotFoundException {
-        try {
-            return createSuccessResponse(babyService.findById(babyId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+    public ResponseEntity<ApiResponse<Baby>> findById(@RequestParam Integer babyId) {
 
+        return ResponseEntity.ok(ApiResponse.success(babyService.findById(babyId)));
     }
 
     @PostMapping("/save")
@@ -52,13 +48,7 @@ public class BabyController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            Baby savedBaby = babyService.save(createBabyDto);
-            return createSuccessResponse(savedBaby);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(babyService.save(createBabyDto)));
     }
 
     @PutMapping("/update")
@@ -68,23 +58,14 @@ public class BabyController extends BaseController {
         if (hasErrors(bindingResult)) {
             return createErrorResponse(bindingResult);
         }
-        try {
-            Baby updatedBaby = babyService.update(updateBabyDto);
-            return createSuccessResponse(updatedBaby);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+
+        return ResponseEntity.ok(ApiResponse.success(babyService.update(updateBabyDto)));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int babyId) {
 
-        try {
-            int deletedBabyId = babyService.delete(babyId);
-            return createSuccessResponse(deletedBabyId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(babyService.delete(babyId)));
     }
 
     @GetMapping("/find-all")
@@ -94,24 +75,13 @@ public class BabyController extends BaseController {
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
 
-        try {
-            return createSuccessResponse(
-                    babyService.findAllByQueryParametars(searchText, startRangeDate, endRangeDate, page, size));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(babyService.findAllByQueryParametars(searchText, startRangeDate, endRangeDate, page, size)));
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        try {
-            return createSuccessResponse(babyService.findAllList());
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(babyService.findAllList()));
     }
 
 }

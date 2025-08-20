@@ -21,12 +21,8 @@ public class PaymentTypeController extends BaseController {
 
     @GetMapping("/find-all")
     public ResponseEntity<ApiResponse<List<PaymentType>>> findAll() {
-        try {
-            return createSuccessResponse(paymentTypeService.findAll());
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
 
+        return ResponseEntity.ok(ApiResponse.success(paymentTypeService.findAll()));
     }
 
 }

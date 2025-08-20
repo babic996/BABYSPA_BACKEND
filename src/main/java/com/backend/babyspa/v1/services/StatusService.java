@@ -2,6 +2,7 @@ package com.backend.babyspa.v1.services;
 
 import java.util.List;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,27 +24,24 @@ public class StatusService {
     @Autowired
     StatusTypeService statusTypeService;
 
-    public Status findById(int statusId) throws NotFoundException {
-
+    public Status findById(int statusId) {
         return statusRepository.findById(statusId)
-                .orElseThrow(() -> new NotFoundException("Nije pronadjen status sa id: " + statusId + "!"));
+                .orElseThrow(() -> new NotFoundException("Nije pronađen status sa id: " + statusId + "!"));
     }
 
-    public Status findByStatusCode(String statusCode) throws NotFoundException {
-
+    public Status findByStatusCode(String statusCode) {
         return statusRepository.findByStatusCode(statusCode)
-                .orElseThrow(() -> new NotFoundException("Nije pronadjen status sa kodom: " + statusCode + "!"));
+                .orElseThrow(() -> new NotFoundException("Nije pronađen status sa kodom: " + statusCode + "!"));
     }
 
-    public Status save(CreateStatusDto createStatusDto) throws Exception {
-
-        Status status = new Status();
+    public Status save(CreateStatusDto createStatusDto) {
         StatusType statusType = statusTypeService.findById(createStatusDto.getStatusTypeId());
 
         if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(createStatusDto.getStatusName(),
                 createStatusDto.getStatusCode(), statusType)) {
-            throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
+            throw new BuisnessException("Postoji status sa ovom kombinacijom imena i koda!");
         }
+        Status status = new Status();
 
         status.setStatusCode(createStatusDto.getStatusCode());
         status.setStatusName(createStatusDto.getStatusName());
@@ -52,15 +50,14 @@ public class StatusService {
         return statusRepository.save(status);
     }
 
-    public Status update(UpdateStatusDto updateStatusDto) throws Exception {
-
-        Status status = findById(updateStatusDto.getStatusId());
+    public Status update(UpdateStatusDto updateStatusDto) {
         StatusType statusType = statusTypeService.findById(updateStatusDto.getStatusTypeId());
 
         if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(updateStatusDto.getStatusName(),
-                updateStatusDto.getStatusCode(), statusType, status.getStatusId())) {
-            throw new Exception("Postoji status sa ovom kombinacijom imena i koda!");
+                updateStatusDto.getStatusCode(), statusType, updateStatusDto.getStatusId())) {
+            throw new BuisnessException("Postoji status sa ovom kombinacijom imena i koda!");
         }
+        Status status = findById(updateStatusDto.getStatusId());
 
         status.setStatusCode(updateStatusDto.getStatusCode());
         status.setStatusName(updateStatusDto.getStatusName());
@@ -70,8 +67,7 @@ public class StatusService {
     }
 
     @Transactional
-    public int delete(int statusId) throws NotFoundException {
-
+    public int delete(int statusId) {
         Status status = findById(statusId);
 
         statusRepository.delete(status);
@@ -79,12 +75,10 @@ public class StatusService {
     }
 
     public List<Status> findAll() {
-
         return statusRepository.findAll();
     }
 
     public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
-
         return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
     }
 

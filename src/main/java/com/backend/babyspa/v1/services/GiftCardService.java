@@ -3,6 +3,7 @@ package com.backend.babyspa.v1.services;
 import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.CreateGiftCardDto;
 import com.backend.babyspa.v1.dtos.UpdateGiftCardDto;
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Arrangement;
 import com.backend.babyspa.v1.models.GiftCard;
@@ -32,22 +33,20 @@ public class GiftCardService {
     @Autowired
     ArrangementRepository arrangementRepository;
 
-    public GiftCard findBySerialNumber(String serialNumber) throws NotFoundException {
-
+    public GiftCard findBySerialNumber(String serialNumber) {
         return giftCardRepository.findBySerialNumberAndTenantId(serialNumber, TenantContext.getTenant())
                 .orElseThrow(() -> new NotFoundException("Nije pronađena poklon kartica sa serijskim brojem: " + serialNumber + "!"));
     }
 
     @Transactional
-    public GiftCard findById(Integer giftCardId) throws NotFoundException {
-
+    public GiftCard findById(Integer giftCardId) {
         return giftCardRepository.findById(giftCardId)
                 .orElseThrow(() -> new IllegalArgumentException("Nije pronađena poklon kartica sa ID: " + giftCardId + "!"));
     }
 
-    public GiftCard save(CreateGiftCardDto createGiftCardDto) throws Exception {
+    public GiftCard save(CreateGiftCardDto createGiftCardDto) {
         if (giftCardRepository.existsBySerialNumberAndTenantId(createGiftCardDto.getSerialNumber(), TenantContext.getTenant())) {
-            throw new Exception("Postoji poklon kartica sa ovim serijskim brojem!");
+            throw new BuisnessException("Postoji poklon kartica sa ovim serijskim brojem!");
         }
 
         GiftCard giftCard = new GiftCard();
@@ -57,9 +56,9 @@ public class GiftCardService {
         return giftCardRepository.save(giftCard);
     }
 
-    public GiftCard update(UpdateGiftCardDto updateGiftCardDto) throws Exception {
+    public GiftCard update(UpdateGiftCardDto updateGiftCardDto) {
         if (giftCardRepository.existsBySerialNumberAndTenantIdAndGiftCardIdNot(updateGiftCardDto.getSerialNumber(), TenantContext.getTenant(), updateGiftCardDto.getGiftCardId())) {
-            throw new Exception("Postoji poklon kartica sa ovim serijskim brojem!");
+            throw new BuisnessException("Postoji poklon kartica sa ovim serijskim brojem!");
         }
 
         GiftCard giftCard = findById(updateGiftCardDto.getGiftCardId());
@@ -71,7 +70,7 @@ public class GiftCardService {
     }
 
     public List<GiftCard> findAllList(Boolean isUsed, Integer arrangementId) {
-        List<GiftCard> giftCardsList = new ArrayList<GiftCard>();
+        List<GiftCard> giftCardsList;
         if (Objects.nonNull(isUsed)) {
             giftCardsList = giftCardRepository.findByUsedAndTenantId(isUsed, TenantContext.getTenant());
             if (Objects.nonNull(arrangementId) && !isUsed) {
@@ -91,7 +90,7 @@ public class GiftCardService {
     public int delete(int giftCardId) {
         GiftCard giftCard = findById(giftCardId);
         if (arrangementRepository.existsByGiftCardAndIsDeleted(giftCard, false)) {
-            throw new IllegalArgumentException("Ova kartica je dodijeljena aranžmanu i nije moguće njeno brisanje!");
+            throw new BuisnessException("Ova kartica je dodijeljena aranžmanu i nije moguće njeno brisanje!");
         }
         giftCardRepository.delete(giftCard);
         return giftCardId;
@@ -107,8 +106,7 @@ public class GiftCardService {
     public Page<FindAllGiftCardDto> findAll(int page, int size, String serialNumber,
                                             Boolean isUsed, Integer giftCardId, LocalDateTime startDate,
                                             LocalDateTime endDate) {
-
-        List<FindAllGiftCardDto> giftCards = new ArrayList<FindAllGiftCardDto>();
+        List<FindAllGiftCardDto> giftCards;
 
         if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
             startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");

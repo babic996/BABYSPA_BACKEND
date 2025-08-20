@@ -33,13 +33,7 @@ public class GiftCardController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            GiftCard giftCard = giftCardService.save(createGiftCardDto);
-            return createSuccessResponse(giftCard);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(giftCardService.save(createGiftCardDto)));
     }
 
     @PutMapping("/update")
@@ -49,22 +43,13 @@ public class GiftCardController extends BaseController {
         if (hasErrors(bindingResult)) {
             return createErrorResponse(bindingResult);
         }
-        try {
-            GiftCard giftCard = giftCardService.update(updateGiftCardDto);
-            return createSuccessResponse(giftCard);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(giftCardService.update(updateGiftCardDto)));
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<GiftCard>>> findAllList(@RequestParam(required = false) Boolean isUsed, @RequestParam(required = false) Integer arrangementId) {
 
-        try {
-            return createSuccessResponse(giftCardService.findAllList(isUsed, arrangementId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(giftCardService.findAllList(isUsed, arrangementId)));
     }
 
 
@@ -76,21 +61,13 @@ public class GiftCardController extends BaseController {
                                                                          @RequestParam(required = false) Integer giftCardId,
                                                                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
-        try {
-            return createSuccessResponse(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+
+        return ResponseEntity.ok(ApiResponse.success(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate)));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int giftCardId) {
 
-        try {
-            int deletedGiftCardId = giftCardService.delete(giftCardId);
-            return createSuccessResponse(deletedGiftCardId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(giftCardService.delete(giftCardId)));
     }
 }

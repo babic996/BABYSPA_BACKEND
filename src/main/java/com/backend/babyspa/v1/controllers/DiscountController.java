@@ -2,6 +2,7 @@ package com.backend.babyspa.v1.controllers;
 
 import java.util.List;
 
+import com.backend.babyspa.v1.models.Reservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,69 +27,46 @@ import jakarta.validation.Valid;
 @RequestMapping("/discount")
 public class DiscountController extends BaseController {
 
-	@Autowired
-	DiscountService discountService;
+    @Autowired
+    DiscountService discountService;
 
-	@GetMapping("/find-by-id")
-	public ResponseEntity<ApiResponse<Discount>> findById(@RequestParam int discountId) {
+    @GetMapping("/find-by-id")
+    public ResponseEntity<ApiResponse<Discount>> findById(@RequestParam int discountId) {
 
-		try {
-			return createSuccessResponse(discountService.findById(discountId));
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(discountService.findById(discountId)));
+    }
 
-	@PostMapping("/save")
-	public ResponseEntity<ApiResponse<Discount>> save(@RequestBody @Valid CreateDiscountDto createDiscountDto,
-			BindingResult bindingResult) {
+    @PostMapping("/save")
+    public ResponseEntity<ApiResponse<Discount>> save(@RequestBody @Valid CreateDiscountDto createDiscountDto,
+                                                      BindingResult bindingResult) {
 
-		if (hasErrors(bindingResult)) {
-			return createErrorResponse(bindingResult);
-		}
+        if (hasErrors(bindingResult)) {
+            return createErrorResponse(bindingResult);
+        }
 
-		try {
-			Discount discount = discountService.save(createDiscountDto);
-			return createSuccessResponse(discount);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
+        return ResponseEntity.ok(ApiResponse.success(discountService.save(createDiscountDto)));
+    }
 
-	}
+    @PutMapping("/update")
+    public ResponseEntity<ApiResponse<Discount>> update(@RequestBody @Valid UpdateDiscountDto updateDiscountDto,
+                                                        BindingResult bindingResult) {
 
-	@PutMapping("/update")
-	public ResponseEntity<ApiResponse<Discount>> update(@RequestBody @Valid UpdateDiscountDto updateDiscountDto,
-			BindingResult bindingResult) {
+        if (hasErrors(bindingResult)) {
+            return createErrorResponse(bindingResult);
+        }
 
-		if (hasErrors(bindingResult)) {
-			return createErrorResponse(bindingResult);
-		}
-		try {
-			Discount discount = discountService.update(updateDiscountDto);
-			return createSuccessResponse(discount);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(discountService.update(updateDiscountDto)));
+    }
 
-	@DeleteMapping("/delete")
-	public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int discountId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int discountId) {
 
-		try {
-			int deletedDiscountId = discountService.delete(discountId);
-			return createSuccessResponse(deletedDiscountId);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(discountService.delete(discountId)));
+    }
 
-	@GetMapping("/find-all")
-	public ResponseEntity<ApiResponse<List<Discount>>> findAll() {
+    @GetMapping("/find-all")
+    public ResponseEntity<ApiResponse<List<Discount>>> findAll() {
 
-		try {
-			return createSuccessResponse(discountService.findAll());
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(discountService.findAll()));
+    }
 }

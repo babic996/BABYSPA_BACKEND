@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.projections.LocalDateProjection;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,47 +59,43 @@ public class ReservationService {
     private final String reservationCanceled = "term_canceled";
     private final String reservationStatusType = "reservation";
 
-    public Reservation findById(int reservationId) throws NotFoundException {
-
+    public Reservation findById(int reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjena rezervacija sa id: " + reservationId + "!"));
     }
 
-    public List<ReservationShortInfo> findByArrangementId(int arrangementId) throws NotFoundException {
-
+    public List<ReservationShortInfo> findByArrangementId(int arrangementId) {
         Arrangement arrangement = arrangementService.findById(arrangementId);
-        List<ReservationShortInfo> reservationShortInfoList = reservationRepository.findByArrangementAndIsDeleted(arrangement, false)
+
+        return reservationRepository.findByArrangementAndIsDeleted(arrangement, false)
                 .stream()
-                .map(x -> new ReservationShortInfo(x.getStartDate(), x.getEndDate(), x.getStatus().getStatusName()))
-                .collect(Collectors.toList());
-
-        return reservationShortInfoList;
-
+                .map(r -> new ReservationShortInfo(r.getStartDate(), r.getEndDate(), r.getStatus().getStatusName()))
+                .toList();
     }
 
-    @Transactional(rollbackOn = Exception.class)
-    public ReservationFindAllDto save(CreateReservationDto createReservationDto) throws Exception {
-
+    @Transactional
+    public ReservationFindAllDto save(CreateReservationDto createReservationDto) {
         Arrangement arrangement = arrangementService.findById(createReservationDto.getArrangementId());
         Status status = statusService.findByStatusCode(reservationReserved);
-        Reservation reservation = new Reservation();
 
         if (arrangement.getRemainingTerm() == 0) {
-            throw new Exception("Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
+            throw new BuisnessException("Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
         }
 
         if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
             Reservation firstReservation = reservationRepository
                     .findFirstByArrangementAndIsDeletedOrderByReservationIdAsc(arrangement, false)
-                    .orElseThrow(() -> new Exception("Nije pronađena prva rezervacija za aranžman čiji je Id: "
+                    .orElseThrow(() -> new NotFoundException("Nije pronađena prva rezervacija za aranžman čiji je Id: "
                             + arrangement.getArrangementId() + "!"));
             if ((firstReservation.getStartDate().plusDays(arrangement.getServicePackage()
                             .getServicePackageDurationDays()
                             + (Objects.nonNull(arrangement.getExtendDurationDays()) ? arrangement.getExtendDurationDays() : 0))
                     .isBefore(createReservationDto.getStartDate()))) {
-                throw new Exception("Nije moguće napraviti rezervaciju jer je broj dana koliko traje paket istekao!");
+                throw new BuisnessException("Nije moguće napraviti rezervaciju jer je broj dana koliko traje paket istekao!");
             }
         }
+
+        Reservation reservation = new Reservation();
 
         reservation.setArrangement(arrangement);
         reservation.setStartDate(createReservationDto.getStartDate());
@@ -114,9 +111,8 @@ public class ReservationService {
         return buildReservationFindAllDtoFromReservation(reservation);
     }
 
-    @Transactional(rollbackOn = Exception.class)
-    public ReservationFindAllDto update(UpdateReservationDto updateReservationDto) throws Exception {
-
+    @Transactional
+    public ReservationFindAllDto update(UpdateReservationDto updateReservationDto) {
         Status status = statusService.findById(updateReservationDto.getStatusId());
         Reservation reservation = findById(updateReservationDto.getReservationId());
         Status statusBeforeUpdate = reservation.getStatus();
@@ -124,7 +120,7 @@ public class ReservationService {
         if (reservation.getStatus().getStatusCode().equals(reservationCanceled)
                 && reservation.getArrangement().getRemainingTerm() == 0
                 && !status.getStatusCode().equals(reservationCanceled)) {
-            throw new NotFoundException(
+            throw new BuisnessException(
                     "Nije moguće ažurirati rezervaciju jer bi broj preostalih termina aranžmana bio manji od 0!");
         } else {
             if (!reservation.getStatus().getStatusCode().equals(reservationCanceled)
@@ -148,10 +144,14 @@ public class ReservationService {
         return buildReservationFindAllDtoFromReservation(reservation);
     }
 
-    @Transactional(rollbackOn = NotFoundException.class)
-    public int delete(int reservationId) throws NotFoundException {
-
+    @Transactional
+    public int delete(int reservationId) {
         Reservation reservation = findById(reservationId);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        if (!reservation.getStartDate().isAfter(currentDateTime)) {
+            throw new BuisnessException("Nije moguće izbrisati rezervaciju koja je već završena.");
+        }
 
         arrangementService.increaseRemainingTerm(reservation.getArrangement());
         reservation.setDeleted(true);
@@ -163,8 +163,7 @@ public class ReservationService {
         return reservationId;
     }
 
-    public int reservationCanceled(int reservationId) throws NotFoundException {
-
+    public int reservationCanceled(int reservationId) {
         Reservation reservation = findById(reservationId);
         Status status = statusService.findByStatusCode(reservationCanceled);
         Status statusBeforeUpdate = reservation.getStatus();
@@ -178,15 +177,12 @@ public class ReservationService {
     }
 
     public List<ReservationFindAllDto> findAllList() {
-
         return reservationRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
-                .map(x -> buildReservationFindAllDtoFromReservation(x)).collect(Collectors.toList());
+                .map(this::buildReservationFindAllDtoFromReservation).toList();
     }
 
     public List<Reservation> findAllByArrangementId(int arrangementId) {
-
         Arrangement arrangement = arrangementService.findById(arrangementId);
-
         return reservationRepository.findByArrangementAndIsDeleted(arrangement, false);
     }
 
@@ -213,14 +209,13 @@ public class ReservationService {
 
     }
 
-    @Transactional(rollbackOn = NotFoundException.class)
+    @Transactional
     public void updateReservationWithStatusCreatedToStatusUsed() {
-
         LocalDateTime dayBefore = LocalDateTime.now().minusDays(1);
         Status statusReservationReserved = statusService.findByStatusCode(reservationReserved);
         Status statusReservationUsed = statusService.findByStatusCode(reservationUsed);
 
-        reservationRepository.findByStartDateAndStatusCode(dayBefore, statusReservationReserved.getStatusId(), false).stream()
+        reservationRepository.findByStartDateAndStatusCode(dayBefore, statusReservationReserved.getStatusId(), false)
                 .forEach(reservation -> updateReservationStatus(reservation, statusReservationUsed));
     }
 
@@ -247,7 +242,6 @@ public class ReservationService {
     }
 
     private ReservationFindAllDto buildReservationFindAllDtoFromReservation(Reservation reservation) {
-
         ReservationFindAllDto reservationFindAllDto = new ReservationFindAllDto();
 
         reservationFindAllDto.setReservationId(reservation.getReservationId());
@@ -263,7 +257,6 @@ public class ReservationService {
     }
 
     public boolean existingByArrangement(int arrangementId) {
-
         Arrangement arrangement = arrangementService.findById(arrangementId);
 
         return reservationRepository.existsByArrangementAndIsDeleted(arrangement, false);
@@ -271,15 +264,14 @@ public class ReservationService {
 
     @Transactional
     public void generateReportForAllDateInReservation(boolean generateForAllDays, LocalDate date, String tenantId) {
-
         if (generateForAllDays) {
             reservationDailyReportService.deleteAll();
             servicePackageDailyReportService.deleteAll();
 
             LocalDate currentDate = LocalDate.now();
             List<LocalDate> allDatesFromReservation = reservationRepository
-                    .findDistinctReservationDates(currentDate.atStartOfDay(), tenantId, false).stream().map(x -> x.getDate())
-                    .collect(Collectors.toList());
+                    .findDistinctReservationDates(currentDate.atStartOfDay(), tenantId, false).stream().map(LocalDateProjection::getDate)
+                    .toList();
 
             allDatesFromReservation.forEach(x -> {
                 generateReservationReport(x, tenantId);

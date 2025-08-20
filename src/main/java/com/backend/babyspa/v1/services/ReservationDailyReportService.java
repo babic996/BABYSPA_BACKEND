@@ -52,7 +52,7 @@ public class ReservationDailyReportService {
             endRangeDate = LocalDateTime.now().plusMinutes(15);
         }
 
-        if (Objects.isNull(startRangeDate) && Objects.isNull(startRangeDate)) {
+        if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
             if (groupDataType.equals(ReportSortEnum.day.name())) {
                 return reservationDailyReportRepository.findAllByStatusIdAndBabyId(statusId, babyId,
                         TenantContext.getTenant());

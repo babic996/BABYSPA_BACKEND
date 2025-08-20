@@ -26,79 +26,52 @@ import jakarta.validation.Valid;
 @RequestMapping("/status")
 public class StatusController extends BaseController {
 
-	@Autowired
-	StatusService statusService;
+    @Autowired
+    StatusService statusService;
 
-	@GetMapping("/find-by-id")
-	public ResponseEntity<ApiResponse<Status>> findById(@RequestParam int statusId) {
+    @GetMapping("/find-by-id")
+    public ResponseEntity<ApiResponse<Status>> findById(@RequestParam int statusId) {
 
-		try {
-			return createSuccessResponse(statusService.findById(statusId));
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.findById(statusId)));
+    }
 
-	@PostMapping("/save")
-	public ResponseEntity<ApiResponse<Status>> save(@RequestBody @Valid CreateStatusDto createStatusDto,
-			BindingResult bindingResult) {
+    @PostMapping("/save")
+    public ResponseEntity<ApiResponse<Status>> save(@RequestBody @Valid CreateStatusDto createStatusDto,
+                                                    BindingResult bindingResult) {
 
-		if (hasErrors(bindingResult)) {
-			return createErrorResponse(bindingResult);
-		}
+        if (hasErrors(bindingResult)) {
+            return createErrorResponse(bindingResult);
+        }
 
-		try {
-			Status status = statusService.save(createStatusDto);
-			return createSuccessResponse(status);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.save(createStatusDto)));
+    }
 
-	@PutMapping("/update")
-	public ResponseEntity<ApiResponse<Status>> update(@RequestBody @Valid UpdateStatusDto updateStatusDto,
-			BindingResult bindingResult) {
+    @PutMapping("/update")
+    public ResponseEntity<ApiResponse<Status>> update(@RequestBody @Valid UpdateStatusDto updateStatusDto,
+                                                      BindingResult bindingResult) {
 
-		if (hasErrors(bindingResult)) {
-			return createErrorResponse(bindingResult);
-		}
+        if (hasErrors(bindingResult)) {
+            return createErrorResponse(bindingResult);
+        }
 
-		try {
-			Status status = statusService.update(updateStatusDto);
-			return createSuccessResponse(status);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.update(updateStatusDto)));
+    }
 
-	@DeleteMapping("/delete")
-	public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int statusId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int statusId) {
 
-		try {
-			int deletedStatusId = statusService.delete(statusId);
-			return createSuccessResponse(deletedStatusId);
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.delete(statusId)));
+    }
 
-	@GetMapping("/find-all")
-	public ResponseEntity<ApiResponse<List<Status>>> findAll() {
+    @GetMapping("/find-all")
+    public ResponseEntity<ApiResponse<List<Status>>> findAll() {
 
-		try {
-			return createSuccessResponse(statusService.findAll());
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.findAll()));
+    }
 
-	@GetMapping("/find-all-status-type-code")
-	public ResponseEntity<ApiResponse<List<Status>>> findByStatusCode(@RequestParam String statusTypeCode) {
+    @GetMapping("/find-all-status-type-code")
+    public ResponseEntity<ApiResponse<List<Status>>> findByStatusCode(@RequestParam String statusTypeCode) {
 
-		try {
-			return createSuccessResponse(statusService.findAllByStatusTypeCode(statusTypeCode));
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(statusService.findAllByStatusTypeCode(statusTypeCode)));
+    }
 }

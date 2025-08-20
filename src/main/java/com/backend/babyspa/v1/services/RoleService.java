@@ -15,13 +15,13 @@ public class RoleService {
     @Autowired
     RoleRepository roleRepository;
 
-    public Role findById(int roleId) throws NotFoundException {
+    public Role findById(int roleId) {
 
         return roleRepository.findById(roleId)
                 .orElseThrow(() -> new NotFoundException("Nije pronađena uloga sa ID: " + roleId + "!"));
     }
 
-    public Role findByRoleName(String roleName) throws NotFoundException {
+    public Role findByRoleName(String roleName) {
 
         return roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new NotFoundException("Nije pronađena uloga sa nazivom: " + roleName + "!"));

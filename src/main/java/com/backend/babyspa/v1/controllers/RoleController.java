@@ -16,16 +16,12 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 @RequestMapping("/role")
 public class RoleController extends BaseController {
 
-	@Autowired
-	RoleService roleService;
+    @Autowired
+    RoleService roleService;
 
-	@GetMapping("/find-all")
-	public ResponseEntity<ApiResponse<List<Role>>> findAll() {
+    @GetMapping("/find-all")
+    public ResponseEntity<ApiResponse<List<Role>>> findAll() {
 
-		try {
-			return createSuccessResponse(roleService.findAll());
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(roleService.findAll()));
+    }
 }

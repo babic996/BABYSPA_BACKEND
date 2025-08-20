@@ -3,8 +3,8 @@ package com.backend.babyspa.v1.services;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,19 +36,17 @@ public class BabyService {
     @Autowired
     SecurityUtil securityUtil;
 
-    public Baby findById(Integer babyId) throws NotFoundException {
-
+    public Baby findById(Integer babyId) {
         return babyRepository.findById(babyId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjena beba sa ID: " + babyId + "!"));
     }
 
-    public Baby save(CreateBabyDto createBabyDto) throws Exception {
-        Baby baby = new Baby();
-
+    public Baby save(CreateBabyDto createBabyDto) {
         if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndIsDeleted(createBabyDto.getPhoneNumber(),
                 createBabyDto.getBabyName(), TenantContext.getTenant(), false)) {
-            throw new Exception("Ova beba je već unesena u sistem!");
+            throw new BuisnessException("Ova beba je već unesena u sistem!");
         }
+        Baby baby = new Baby();
 
         baby.setBabyName(createBabyDto.getBabyName());
         baby.setBabySurname(createBabyDto.getBabySurname());
@@ -62,14 +60,12 @@ public class BabyService {
         return babyRepository.save(baby);
     }
 
-    public Baby update(UpdateBabyDto updateBabyDto) throws Exception {
-
-        Baby baby = findById(updateBabyDto.getBabyId());
-
+    public Baby update(UpdateBabyDto updateBabyDto) {
         if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNotAndIsDeleted(updateBabyDto.getPhoneNumber(),
                 updateBabyDto.getBabyName(), TenantContext.getTenant(), updateBabyDto.getBabyId(), false)) {
-            throw new Exception("Ova beba je već unesena u sistem!");
+            throw new BuisnessException("Ova beba je već unesena u sistem!");
         }
+        Baby baby = findById(updateBabyDto.getBabyId());
 
         baby.setBabyName(updateBabyDto.getBabyName());
         baby.setBabySurname(updateBabyDto.getBabySurname());
@@ -81,16 +77,14 @@ public class BabyService {
         baby.setUpdatedByUser(securityUtil.getCurrentUser());
 
         return babyRepository.save(baby);
-
     }
 
     @Transactional
-    public int delete(int babyId) throws NotFoundException {
-
+    public int delete(int babyId) {
         Baby baby = findById(babyId);
 
         if (arrangementRepository.existsByBabyAndIsDeleted(baby, false)) {
-            throw new IllegalArgumentException("Nije moguće obrisati bebu ako postoji aranžman kojem je dodijeljena.");
+            throw new BuisnessException("Nije moguće obrisati bebu ako postoji aranžman kojem je dodijeljena.");
         }
 
         baby.setDeleted(true);
@@ -103,7 +97,6 @@ public class BabyService {
 
     public Page<Baby> findAllByQueryParametars(String searchText, LocalDateTime start, LocalDateTime end, int page,
                                                int size) {
-
         if (Objects.isNull(start) && Objects.nonNull(end)) {
             start = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
         } else if (Objects.nonNull(start) && Objects.isNull(end)) {
@@ -120,9 +113,8 @@ public class BabyService {
     }
 
     public List<ShortDetailsDto> findAllList() {
-
         return babyRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
-                .map(x -> buildShortDetailsDtoFromBaby(x)).collect(Collectors.toList());
+                .map(this::buildShortDetailsDtoFromBaby).toList();
     }
 
     public void updateMonthsForAll() {
@@ -130,7 +122,6 @@ public class BabyService {
     }
 
     private ShortDetailsDto buildShortDetailsDtoFromBaby(Baby baby) {
-
         ShortDetailsDto shortDetailsDto = new ShortDetailsDto();
         shortDetailsDto.setId(baby.getBabyId());
         shortDetailsDto.setValue(

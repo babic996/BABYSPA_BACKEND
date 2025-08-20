@@ -2,8 +2,8 @@ package com.backend.babyspa.v1.services;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,21 +34,17 @@ public class ServicePackageService {
     @Autowired
     SecurityUtil securityUtil;
 
-    public ServicePackage findById(Integer servicePackageId) throws NotFoundException {
-
-        ServicePackage servicePackage = servicePackageRepository.findById(servicePackageId).orElseThrow(
-                () -> new NotFoundException("Nije pronadjen paket usluge sa ID: " + servicePackageId + "!"));
-
-        return servicePackage;
+    public ServicePackage findById(Integer servicePackageId) {
+        return servicePackageRepository.findById(servicePackageId).orElseThrow(
+                () -> new NotFoundException("Nije pronađen paket usluge sa ID: " + servicePackageId + "!"));
     }
 
-    public ServicePackage save(CreateServicePackageDto createServicePackageDto) throws Exception {
-        ServicePackage servicePackage = new ServicePackage();
-
+    public ServicePackage save(CreateServicePackageDto createServicePackageDto) {
         if (servicePackageRepository.existsByServicePackageNameAndIsDeleted(createServicePackageDto.getServicePackageName(), false)) {
-            throw new Exception(
+            throw new BuisnessException(
                     "Postoji paket usluge sa imenom: " + createServicePackageDto.getServicePackageName() + "!");
         }
+        ServicePackage servicePackage = new ServicePackage();
 
         servicePackage.setServicePackageName(createServicePackageDto.getServicePackageName());
         servicePackage.setPrice(createServicePackageDto.getPrice());
@@ -60,14 +56,13 @@ public class ServicePackageService {
         return servicePackageRepository.save(servicePackage);
     }
 
-    public ServicePackage update(UpdateServicePackageDto updateServicePackageDto) throws Exception {
-        ServicePackage servicePackage = findById(updateServicePackageDto.getServicePackageId());
-
+    public ServicePackage update(UpdateServicePackageDto updateServicePackageDto) {
         if (servicePackageRepository.existsByServicePackageNameAndServicePackageIdNotAndIsDeleted(
                 updateServicePackageDto.getServicePackageName(), updateServicePackageDto.getServicePackageId(), false)) {
-            throw new Exception(
+            throw new BuisnessException(
                     "Postoji paket usluge sa imenom: " + updateServicePackageDto.getServicePackageName() + "!");
         }
+        ServicePackage servicePackage = findById(updateServicePackageDto.getServicePackageId());
 
         if (!arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false)) {
             servicePackage.setServicePackageName(updateServicePackageDto.getServicePackageName());
@@ -83,16 +78,14 @@ public class ServicePackageService {
     }
 
     public Double findMaxPriceServicePackage() {
-
         return servicePackageRepository.findMaxPriceAndIsDeleted(false);
     }
 
     @Transactional
-    public int delete(int servicePackageId) throws NotFoundException {
-
+    public int delete(int servicePackageId) {
         ServicePackage servicePackage = findById(servicePackageId);
         if (arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false)) {
-            throw new IllegalArgumentException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
+            throw new BuisnessException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
         }
 
         servicePackageRepository.delete(servicePackage);
@@ -101,18 +94,15 @@ public class ServicePackageService {
     }
 
     public List<ShortDetailsDto> findAllList() {
-
         return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
-                .map(x -> buildShortDetailsDtoFromServicePackage(x)).collect(Collectors.toList());
+                .map(this::buildShortDetailsDtoFromServicePackage).toList();
     }
 
     public List<ServicePackage> findAll() {
-
         return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false);
     }
 
     private ShortDetailsDto buildShortDetailsDtoFromServicePackage(ServicePackage servicePackage) {
-
         ShortDetailsDto shortDetailsDto = new ShortDetailsDto();
         shortDetailsDto.setId(servicePackage.getServicePackageId());
         shortDetailsDto.setValue(servicePackage.getServicePackageName());
@@ -122,7 +112,6 @@ public class ServicePackageService {
 
     public Page<ServicePackage> findAll(int page, int size, String searchText, BigDecimal startPrice,
                                         BigDecimal endPrice) {
-
         Pageable pageable = PageRequest.of(page, size);
 
         return servicePackageRepository.findAllServicePackageNative(searchText, startPrice, endPrice,
@@ -132,7 +121,6 @@ public class ServicePackageService {
     // ovaj se servis koristi samo za izvjestaje jer se izvjestaji generisu preko
     // schedulera
     public List<ServicePackage> findAllByTenantForReport(String tenantId) {
-
         return servicePackageRepository.findAllByTenantIdAndIsDeleted(tenantId, false);
     }
 

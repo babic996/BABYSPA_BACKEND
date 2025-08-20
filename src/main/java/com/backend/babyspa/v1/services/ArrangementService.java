@@ -4,11 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import com.backend.babyspa.v1.models.*;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,15 +67,13 @@ public class ArrangementService {
 
     private final String createdStatus = "created";
 
-    public Arrangement findById(int arrangementId) throws NotFoundException {
-
+    public Arrangement findById(int arrangementId) {
         return arrangementRepository.findById(arrangementId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjen aranzman sa id: " + arrangementId + "!"));
     }
 
     @Transactional
-    public Arrangement save(CreateArrangementDto createArrangementDto) throws Exception {
-
+    public Arrangement save(CreateArrangementDto createArrangementDto) {
         Arrangement arrangement = new Arrangement();
         Baby baby = babyService.findById(createArrangementDto.getBabyId());
         Status status = statusService.findByStatusCode(createdStatus);
@@ -93,7 +90,7 @@ public class ArrangementService {
 
             } else {
                 if (discount.getValue().compareTo(servicePackage.getPrice()) > 0) {
-                    throw new Exception("Popust je veći od cijene aranžmana!");
+                    throw new BuisnessException("Popust je veći od cijene aranžmana!");
                 } else {
                     arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
                 }
@@ -116,11 +113,10 @@ public class ArrangementService {
     }
 
     @Transactional
-    public FindAllArrangementDto update(UpdateArrangementDto updateArrangementDto) throws NotFoundException, Exception {
-
+    public FindAllArrangementDto update(UpdateArrangementDto updateArrangementDto) {
         Arrangement arrangement = findById(updateArrangementDto.getArrangementId());
-        Baby baby = new Baby();
-        ServicePackage servicePackage = new ServicePackage();
+        Baby baby;
+        ServicePackage servicePackage;
         Arrangement arrangementBeforeUpdate = arrangement;
 
         // ako postoji rezervacija moze mijenjati samo status, discount i paymentType
@@ -141,7 +137,7 @@ public class ArrangementService {
                 && Objects.nonNull(updateArrangementDto.getPaymentTypeId())) {
             PaymentType paymentType = paymentTypeService.findById(updateArrangementDto.getPaymentTypeId());
             if (paymentType.getPaymentTypeCode().equals("gift") && Objects.isNull(updateArrangementDto.getGiftCardId())) {
-                throw new Exception("Morate izabrati poklon karticu!");
+                throw new BuisnessException("Morate izabrati poklon karticu!");
             }
             arrangement.setPaymentType(paymentType);
         } else {
@@ -163,7 +159,7 @@ public class ArrangementService {
 
             } else {
                 if (discount.getValue().compareTo(arrangement.getPrice()) > 0) {
-                    throw new Exception("Popust je veći od cijene aranžmana!");
+                    throw new BuisnessException("Popust je veći od cijene aranžmana!");
                 } else {
                     arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
                 }
@@ -181,7 +177,7 @@ public class ArrangementService {
                 LocalDate expirationDate = giftCard.getExpirationDate().toLocalDate();
                 LocalDate today = LocalDate.now();
                 if (today.isAfter(expirationDate)) {
-                    throw new Exception("Poklon kartica je istekla!");
+                    throw new BuisnessException("Poklon kartica je istekla!");
                 }
             }
             if (Objects.nonNull(arrangement.getGiftCard()) && !giftCard.equals(arrangement.getGiftCard())) {
@@ -222,13 +218,13 @@ public class ArrangementService {
     }
 
     @Transactional
-    public int delete(int arrangementId) throws Exception {
+    public int delete(int arrangementId) {
 
         Arrangement arrangement = findById(arrangementId);
 
         if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
 
-            throw new Exception("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
+            throw new BuisnessException("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
         }
 
         arrangement.setDeleted(true);
@@ -248,9 +244,8 @@ public class ArrangementService {
     public Page<FindAllArrangementDto> findAll(int page, int size, Integer babyId, Integer statusId,
                                                Integer servicePackageId, Integer paymentTypeId, Integer giftCardId, Integer remaingingTerm, BigDecimal startPrice,
                                                BigDecimal endPrice, Integer arrangementId, LocalDateTime startDate, LocalDateTime endDate) {
-
-        List<FindAllArrangementDto> arrangementDto = new ArrayList<FindAllArrangementDto>();
-        List<Arrangement> arrangement = new ArrayList<Arrangement>();
+        List<FindAllArrangementDto> arrangementDto;
+        List<Arrangement> arrangement;
 
         if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
             startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
@@ -267,8 +262,8 @@ public class ArrangementService {
                     endDate, TenantContext.getTenant(), false);
         }
 
-        arrangementDto = arrangement.stream().map(x -> buildFindAllArrangementDtoFromArrangement(x))
-                .collect(Collectors.toList());
+        arrangementDto = arrangement.stream().map(this::buildFindAllArrangementDtoFromArrangement)
+                .toList();
 
         Pageable pageable = PageRequest.of(page, size);
         int start = (int) pageable.getOffset();
@@ -286,7 +281,6 @@ public class ArrangementService {
     public BigDecimal findTotalSum(Integer babyId, Integer statusId, Integer servicePackageId, Integer paymentTypeId, Integer giftCardId,
                                    Integer remaingingTerm, BigDecimal startPrice, BigDecimal endPrice, Integer arrangementId,
                                    LocalDateTime startDate, LocalDateTime endDate) {
-
         if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
             startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
         } else if (Objects.nonNull(startDate) && Objects.isNull(endDate)) {
@@ -308,14 +302,12 @@ public class ArrangementService {
     }
 
     public List<ShortDetailsDto> findAllArrangementList() {
-
         return arrangementRepository
                 .findByRemainingTermGreaterThanAndTenantIdAndIsDeleted(0, TenantContext.getTenant(), false).stream()
-                .map(x -> buildShortDetailsFromArrangement(x)).collect(Collectors.toList());
+                .map(this::buildShortDetailsFromArrangement).toList();
     }
 
     private ShortDetailsDto buildShortDetailsFromArrangement(Arrangement arrangement) {
-
         ShortDetailsDto shortDetailsDto = new ShortDetailsDto();
 
         shortDetailsDto.setId(arrangement.getArrangementId());
@@ -331,7 +323,6 @@ public class ArrangementService {
     }
 
     public FindAllArrangementDto buildFindAllArrangementDtoFromArrangement(Arrangement arrangement) {
-
         FindAllArrangementDto findAllArrangementDto = new FindAllArrangementDto();
         findAllArrangementDto.setArrangementId(arrangement.getArrangementId());
         findAllArrangementDto.setCreatedAt(arrangement.getCreatedAt());

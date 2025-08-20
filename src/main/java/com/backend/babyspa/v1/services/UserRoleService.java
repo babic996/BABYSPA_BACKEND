@@ -1,7 +1,8 @@
 package com.backend.babyspa.v1.services;
 
-import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.AssignRolesDto;
+import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Role;
 import com.backend.babyspa.v1.models.User;
 import com.backend.babyspa.v1.models.UserRole;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.backend.babyspa.v1.repositories.UserRoleRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserRoleService {
@@ -32,15 +32,14 @@ public class UserRoleService {
 
     @Transactional
     public String assignRolesToUser(AssignRolesDto assignRolesDto, Authentication authentication) {
-
         boolean hasPermission = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN") || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
         if (!hasPermission) {
-            throw new IllegalArgumentException("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
+            throw new BuisnessException("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
         }
 
         User user = userRepository.findById(assignRolesDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Nije pronađen korisnik sa ID: " + assignRolesDto.getUserId() + "!"));
+                .orElseThrow(() -> new NotFoundException("Nije pronađen korisnik sa ID: " + assignRolesDto.getUserId() + "!"));
 
         userRoleRepository.deleteByUser(user);
         assignRolesDto.getRoleIds().forEach(roleId -> {
@@ -56,7 +55,7 @@ public class UserRoleService {
     }
 
     public List<Role> findByUser(User user) {
-        return userRoleRepository.findByUser(user).stream().map((x) -> x.getRole()).collect(Collectors.toList());
+        return userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
     }
 
 

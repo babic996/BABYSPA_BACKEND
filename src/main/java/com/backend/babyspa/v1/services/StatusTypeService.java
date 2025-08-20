@@ -13,8 +13,7 @@ public class StatusTypeService {
     @Autowired
     StatusTypeRepository statusTypeRepository;
 
-    public StatusType findById(int statusTypeId) throws NotFoundException {
-
+    public StatusType findById(int statusTypeId) {
         return statusTypeRepository.findById(statusTypeId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjen tip status sa ID: " + statusTypeId + "!"));
     }

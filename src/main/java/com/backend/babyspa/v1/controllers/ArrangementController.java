@@ -38,21 +38,13 @@ public class ArrangementController extends BaseController {
     @GetMapping("/find-by-id")
     public ResponseEntity<ApiResponse<Arrangement>> findById(@RequestParam int arrangementId) {
 
-        try {
-            return createSuccessResponse(arrangementService.findById(arrangementId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.findById(arrangementId)));
     }
 
     @GetMapping("/exists-by-service-package-id")
     public ResponseEntity<ApiResponse<Boolean>> existsByServicePackageId(@RequestParam int servicePackageId) {
 
-        try {
-            return createSuccessResponse(arrangementService.existsByServicePackage(servicePackageId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.existsByServicePackage(servicePackageId)));
     }
 
     @PostMapping("/save")
@@ -63,12 +55,7 @@ public class ArrangementController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            Arrangement arrangement = arrangementService.save(createReservationDto);
-            return createSuccessResponse(arrangement);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.save(createReservationDto)));
     }
 
     @PutMapping("/update")
@@ -79,23 +66,13 @@ public class ArrangementController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            FindAllArrangementDto arrangement = arrangementService.update(updateReservationDto);
-            return createSuccessResponse(arrangement);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.update(updateReservationDto)));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int arrangementId) {
 
-        try {
-            int deletedArrangementId = arrangementService.delete(arrangementId);
-            return createSuccessResponse(deletedArrangementId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.delete(arrangementId)));
     }
 
     @GetMapping("/find-all")
@@ -109,13 +86,9 @@ public class ArrangementController extends BaseController {
                                                                             @RequestParam(required = false) Integer arrangementId,
                                                                             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
-        try {
-            return createSuccessResponse(arrangementService.findAll(page, size, babyId, statusId, servicePackageId,
-                    paymentTypeId, giftCardId, remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
 
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.findAll(page, size, babyId, statusId, servicePackageId,
+                paymentTypeId, giftCardId, remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate)));
     }
 
     @GetMapping("/find-price")
@@ -129,23 +102,14 @@ public class ArrangementController extends BaseController {
                                                                 @RequestParam(required = false) Integer arrangementId,
                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
-        try {
-            return createSuccessResponse(arrangementService.findTotalSum(babyId, statusId, servicePackageId, paymentTypeId, giftCardId,
-                    remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
 
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.findTotalSum(babyId, statusId, servicePackageId, paymentTypeId, giftCardId,
+                remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate)));
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        try {
-            return createSuccessResponse(arrangementService.findAllArrangementList());
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(arrangementService.findAllArrangementList()));
     }
-
 }

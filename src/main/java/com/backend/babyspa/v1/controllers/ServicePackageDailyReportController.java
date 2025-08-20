@@ -19,21 +19,18 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 @RequestMapping("/service-package-daily-report")
 public class ServicePackageDailyReportController extends BaseController {
 
-	@Autowired
-	ServicePackageDailyReportService servicePackageDailyReportService;
+    @Autowired
+    ServicePackageDailyReportService servicePackageDailyReportService;
 
-	@GetMapping("/find-all")
-	public ResponseEntity<ApiResponse<List<ServicePackagesDailyReportProjection>>> findAll(
-			@RequestParam(required = false) Integer servicePackageId,
-			@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-			@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate,
-			@RequestParam(required = true) String groupDataType) {
+    @GetMapping("/find-all")
+    public ResponseEntity<ApiResponse<List<ServicePackagesDailyReportProjection>>> findAll(
+            @RequestParam(required = false) Integer servicePackageId,
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate,
+            @RequestParam String groupDataType) {
 
-		try {
-			return createSuccessResponse(servicePackageDailyReportService.findAll(servicePackageId, startRangeDate,
-					endRangeDate, groupDataType));
-		} catch (Exception e) {
-			return createExceptionResponse(e);
-		}
-	}
+        return ResponseEntity.ok(ApiResponse.success(servicePackageDailyReportService.findAll(servicePackageId, startRangeDate,
+                endRangeDate, groupDataType)));
+		
+    }
 }

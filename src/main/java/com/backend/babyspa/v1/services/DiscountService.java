@@ -2,6 +2,7 @@ package com.backend.babyspa.v1.services;
 
 import java.util.List;
 
+import com.backend.babyspa.v1.exceptions.BuisnessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,22 +21,18 @@ public class DiscountService {
     @Autowired
     DiscountRepository discountRepository;
 
-    public Discount findById(Integer discountId) throws NotFoundException {
+    public Discount findById(Integer discountId) {
 
-        Discount discount = discountRepository.findById(discountId)
-                .orElseThrow(() -> new NotFoundException("Nije pronadjen popust sa ID: " + discountId + "!"));
-
-        return discount;
+        return discountRepository.findById(discountId)
+                .orElseThrow(() -> new NotFoundException("Nije pronađen popust sa ID: " + discountId + "!"));
     }
 
-    public Discount save(CreateDiscountDto createDiscountDto) throws Exception {
-
-        Discount discount = new Discount();
-
+    public Discount save(CreateDiscountDto createDiscountDto) {
         if (discountRepository.existsByValueAndIsPrecentage(createDiscountDto.getValue(),
                 createDiscountDto.getIsPrecentage())) {
-            throw new Exception("Postoji popust sa unijetim parametrima!");
+            throw new BuisnessException("Postoji popust sa unijetim parametrima!");
         }
+        Discount discount = new Discount();
 
         if (createDiscountDto.getIsPrecentage()) {
             discount.setDiscountName(createDiscountDto.getValue().toString() + "%");
@@ -49,14 +46,12 @@ public class DiscountService {
         return discountRepository.save(discount);
     }
 
-    public Discount update(UpdateDiscountDto updateDiscountDto) throws Exception {
-
-        Discount discount = findById(updateDiscountDto.getDisountId());
-
+    public Discount update(UpdateDiscountDto updateDiscountDto) {
         if (discountRepository.existsByValueAndIsPrecentageAndDiscountIdNot(updateDiscountDto.getValue(),
                 updateDiscountDto.getIsPrecentage(), updateDiscountDto.getDisountId())) {
-            throw new Exception("Postoji popust sa unijetim parametrima!");
+            throw new BuisnessException("Postoji popust sa unijetim parametrima!");
         }
+        Discount discount = findById(updateDiscountDto.getDisountId());
 
         if (updateDiscountDto.getIsPrecentage()) {
             discount.setDiscountName(updateDiscountDto.getValue().toString() + "%");
@@ -71,7 +66,7 @@ public class DiscountService {
     }
 
     @Transactional
-    public int delete(int discountId) throws NotFoundException {
+    public int delete(int discountId) {
         Discount discount = findById(discountId);
 
         discountRepository.delete(discount);

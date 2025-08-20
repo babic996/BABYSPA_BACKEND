@@ -38,22 +38,14 @@ public class ReservationController extends BaseController {
     @GetMapping("/find-by-id")
     public ResponseEntity<ApiResponse<Reservation>> findById(@RequestParam int reservationId) {
 
-        try {
-            return createSuccessResponse(reservationService.findById(reservationId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.findById(reservationId)));
     }
 
     @GetMapping("/find-by-arrangement-id")
     public ResponseEntity<ApiResponse<List<ReservationShortInfo>>> findByArrangementId(
             @RequestParam int arrangementId) {
 
-        try {
-            return createSuccessResponse(reservationService.findByArrangementId(arrangementId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.findByArrangementId(arrangementId)));
     }
 
     @PostMapping("/save")
@@ -64,12 +56,7 @@ public class ReservationController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            ReservationFindAllDto reservation = reservationService.save(createReservationDto);
-            return createSuccessResponse(reservation);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.save(createReservationDto)));
     }
 
     @PutMapping("/update")
@@ -80,61 +67,37 @@ public class ReservationController extends BaseController {
             return createErrorResponse(bindingResult);
         }
 
-        try {
-            ReservationFindAllDto reservation = reservationService.update(updateReservationDto);
-            return createSuccessResponse(reservation);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.update(updateReservationDto)));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int reservationId) {
 
-        try {
-            int deletedReservationId = reservationService.delete(reservationId);
-            return createSuccessResponse(deletedReservationId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.delete(reservationId)));
     }
 
     @PutMapping("/canceled")
     public ResponseEntity<ApiResponse<Integer>> reservationCanceled(@RequestParam int reservationId) {
 
-        try {
-            int canceledReservationId = reservationService.reservationCanceled(reservationId);
-            return createSuccessResponse(canceledReservationId);
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.reservationCanceled(reservationId)));
     }
 
     @GetMapping("/find-all-list")
     public ResponseEntity<ApiResponse<List<ReservationFindAllDto>>> findAll() {
 
-        return createSuccessResponse(reservationService.findAllList());
+        return ResponseEntity.ok(ApiResponse.success(reservationService.findAllList()));
     }
 
     @GetMapping("/find-all-by-arrangement")
     public ResponseEntity<ApiResponse<List<Reservation>>> findAllByArrangement(@RequestParam int arrangementId) {
 
-        try {
-            return createSuccessResponse(reservationService.findAllByArrangementId(arrangementId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
+        return ResponseEntity.ok(ApiResponse.success(reservationService.findAllByArrangementId(arrangementId)));
     }
 
     @GetMapping("/exists-by-arrangement")
     public ResponseEntity<ApiResponse<Boolean>> existsByArrangement(@RequestParam int arrangementId) {
 
-        try {
-            return createSuccessResponse(reservationService.existingByArrangement(arrangementId));
-        } catch (Exception e) {
-            return createExceptionResponse(e);
-        }
-
+        return ResponseEntity.ok(ApiResponse.success(reservationService.existingByArrangement(arrangementId)));
     }
 
     @GetMapping("/generate-report")
