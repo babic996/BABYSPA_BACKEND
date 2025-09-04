@@ -322,8 +322,8 @@ public class ReservationService {
     @Transactional
     public void generateReportForAllDateInReservation(boolean generateForAllDays, LocalDate date, String tenantId) {
         if (generateForAllDays) {
-            reservationDailyReportService.deleteAll();
-            servicePackageDailyReportService.deleteAll();
+            reservationDailyReportService.deleteAllByTenantId(tenantId);
+            servicePackageDailyReportService.deleteAllByTenantId(tenantId);
 
             LocalDate currentDate = LocalDate.now();
             List<LocalDate> allDatesFromReservation = reservationRepository

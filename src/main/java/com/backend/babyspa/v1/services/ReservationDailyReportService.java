@@ -88,9 +88,9 @@ public class ReservationDailyReportService {
     }
 
     @Transactional
-    public void deleteAll() {
+    public void deleteAllByTenantId(String tenantId) {
 
-        reservationDailyReportRepository.deleteAll();
+        reservationDailyReportRepository.deleteByTenantId(tenantId);
     }
 
     @Transactional

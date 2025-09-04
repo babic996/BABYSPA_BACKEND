@@ -81,8 +81,8 @@ public class ServicePackageDailyReportService {
     }
 
     @Transactional
-    public void deleteAll() {
-        servicePackageDailyReportRepository.deleteAll();
+    public void deleteAllByTenantId(String tenantId) {
+        servicePackageDailyReportRepository.deleteByTenantId(tenantId);
     }
 
     @Transactional

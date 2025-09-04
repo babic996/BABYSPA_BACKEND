@@ -20,6 +20,8 @@ public interface ServicePackageDailyReportRepository extends JpaRepository<Servi
 
 	void deleteByDateAndTenantId(LocalDate date, String tenantId);
 
+	void deleteByTenantId(String tenantId);
+
 	@Query(value = """
 			SELECT
 			    TO_CHAR(date, 'DD.MM.YYYY.') AS date,
