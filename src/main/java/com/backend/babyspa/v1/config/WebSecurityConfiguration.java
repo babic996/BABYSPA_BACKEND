@@ -59,7 +59,7 @@ public class WebSecurityConfiguration {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("http://37.27.245.73:3000");
+        config.addAllowedOrigin("https://babyspatime.app");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);

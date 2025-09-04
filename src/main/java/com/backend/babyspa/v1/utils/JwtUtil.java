@@ -28,12 +28,6 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtUtil {
 
-    @Value("${jwt.iss}")
-    private String JWT_ISSUER;
-
-    @Value("${jwt.aud}")
-    private String JWT_AUDIENCE;
-
     private final SecretKey SECRET_KEY;
 
     @Autowired
@@ -90,8 +84,6 @@ public class JwtUtil {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setAudience(JWT_AUDIENCE)
-                .setIssuer(JWT_ISSUER)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(setTokenExpirationDate(48))
                 .signWith(SECRET_KEY)
