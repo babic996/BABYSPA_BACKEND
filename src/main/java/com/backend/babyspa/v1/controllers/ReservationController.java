@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.backend.babyspa.v1.dtos.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -18,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.babyspa.v1.config.TenantContext;
-import com.backend.babyspa.v1.dtos.CreateReservationDto;
-import com.backend.babyspa.v1.dtos.ReservationFindAllDto;
-import com.backend.babyspa.v1.dtos.ReservationShortInfo;
-import com.backend.babyspa.v1.dtos.UpdateReservationDto;
 import com.backend.babyspa.v1.models.Reservation;
 import com.backend.babyspa.v1.services.ReservationService;
 import com.backend.babyspa.v1.utils.ApiResponse;
@@ -86,6 +84,17 @@ public class ReservationController extends BaseController {
     public ResponseEntity<ApiResponse<List<ReservationFindAllDto>>> findAll() {
 
         return ResponseEntity.ok(ApiResponse.success(reservationService.findAllList()));
+    }
+
+    @GetMapping("/find-all")
+    public ResponseEntity<ApiResponse<Page<ReservationFindAllTableDto>>> findAll(@RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Integer statusId,
+                                                                                 @RequestParam(required = false) Integer arrangementId,
+                                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
+                                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+
+        return ResponseEntity.ok(ApiResponse.success(reservationService.findAll(page, size, statusId,
+                arrangementId, startRangeDate, endRangeDate)));
     }
 
     @GetMapping("/find-all-by-arrangement")

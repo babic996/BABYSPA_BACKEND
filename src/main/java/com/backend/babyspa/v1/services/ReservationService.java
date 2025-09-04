@@ -5,19 +5,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.backend.babyspa.v1.dtos.*;
 import com.backend.babyspa.v1.exceptions.BuisnessException;
 import com.backend.babyspa.v1.projections.LocalDateProjection;
+import com.backend.babyspa.v1.utils.DateTimeUtil;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.backend.babyspa.v1.config.TenantContext;
-import com.backend.babyspa.v1.dtos.CreateReservationDto;
-import com.backend.babyspa.v1.dtos.ReservationDailyReportDto;
-import com.backend.babyspa.v1.dtos.ReservationFindAllDto;
-import com.backend.babyspa.v1.dtos.ReservationShortInfo;
-import com.backend.babyspa.v1.dtos.ServicePackageDailyReportDto;
-import com.backend.babyspa.v1.dtos.UpdateReservationDto;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Arrangement;
 import com.backend.babyspa.v1.models.Reservation;
@@ -149,11 +149,14 @@ public class ReservationService {
         Reservation reservation = findById(reservationId);
         LocalDateTime currentDateTime = LocalDateTime.now();
 
-        if (!reservation.getStartDate().isAfter(currentDateTime)) {
-            throw new BuisnessException("Nije moguće izbrisati rezervaciju koja je već završena.");
+//        if (!reservation.getStartDate().isAfter(currentDateTime)) {
+//            throw new BuisnessException("Nije moguće izbrisati rezervaciju koja je već završena.");
+//        }
+
+        if (!reservation.getStatus().getStatusCode().equals(reservationCanceled)) {
+            arrangementService.increaseRemainingTerm(reservation.getArrangement());
         }
 
-        arrangementService.increaseRemainingTerm(reservation.getArrangement());
         reservation.setDeleted(true);
         reservation.setDeletedByUser(securityUtil.getCurrentUser());
         reservation.setDeletedAt(LocalDateTime.now());
@@ -179,6 +182,40 @@ public class ReservationService {
     public List<ReservationFindAllDto> findAllList() {
         return reservationRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
                 .map(this::buildReservationFindAllDtoFromReservation).toList();
+    }
+
+    public Page<ReservationFindAllTableDto> findAll(int page, int size, Integer statusId,
+                                                    Integer arrangementId, LocalDateTime startDate, LocalDateTime endDate) {
+        List<ReservationFindAllTableDto> reservationFindAllDtos;
+        List<Reservation> reservations;
+
+        if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
+            startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
+        } else if (Objects.nonNull(startDate) && Objects.isNull(endDate)) {
+            endDate = LocalDateTime.now().plusMinutes(15);
+        }
+
+        if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
+            reservations = reservationRepository.findAllReservationNative(statusId, arrangementId, TenantContext.getTenant(), false);
+        } else {
+            reservations = reservationRepository.findAllReservationNativeWithStartDateAndDate(statusId, arrangementId, startDate,
+                    endDate, TenantContext.getTenant(), false);
+        }
+
+        reservationFindAllDtos = reservations.stream().map(this::buildReservationFindAllTableDtoFromReservation)
+                .toList();
+
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), reservationFindAllDtos.size());
+        if (start > end) {
+            start = end = 0;
+        }
+
+        final Page<ReservationFindAllTableDto> pageItem = new PageImpl<>(reservationFindAllDtos.subList(start, end), pageable,
+                reservationFindAllDtos.size());
+
+        return pageItem;
     }
 
     public List<Reservation> findAllByArrangementId(int arrangementId) {
@@ -254,6 +291,26 @@ public class ReservationService {
                 arrangementService.buildFindAllArrangementDtoFromArrangement(reservation.getArrangement()));
 
         return reservationFindAllDto;
+    }
+
+    private ReservationFindAllTableDto buildReservationFindAllTableDtoFromReservation(Reservation reservation) {
+        ReservationFindAllTableDto reservationFindAllTableDto = new ReservationFindAllTableDto();
+
+        reservationFindAllTableDto.setReservationId(reservation.getReservationId());
+        reservationFindAllTableDto.setArrangementId(reservation.getArrangement().getArrangementId());
+        reservationFindAllTableDto.setBabyDetails(new ShortDetailsDto(reservation.getArrangement().getBaby().getBabyId(),
+                reservation.getArrangement().getBaby().getBabyName() + (Objects.nonNull(reservation.getArrangement().getBaby().getBabySurname())
+                        ? " " + reservation.getArrangement().getBaby().getBabySurname()
+                        : "") + " (" + reservation.getArrangement().getBaby().getPhoneNumber() + ")"));
+        reservationFindAllTableDto.setRemainingTerm(reservation.getArrangement().getRemainingTerm());
+        reservationFindAllTableDto.setStatus(reservation.getStatus());
+        reservationFindAllTableDto.setStartDate(reservation.getStartDate());
+        reservationFindAllTableDto.setEndDate(reservation.getEndDate());
+        reservationFindAllTableDto.setCreatedAt(reservation.getCreatedAt());
+        reservationFindAllTableDto.setServicePackageName(reservation.getArrangement().getServicePackage().getServicePackageName());
+        reservationFindAllTableDto.setNote(reservation.getNote());
+
+        return reservationFindAllTableDto;
     }
 
     public boolean existingByArrangement(int arrangementId) {

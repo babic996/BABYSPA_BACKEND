@@ -1,6 +1,7 @@
 package com.backend.babyspa.v1.services;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.backend.babyspa.v1.exceptions.BuisnessException;
@@ -88,7 +89,10 @@ public class ServicePackageService {
             throw new BuisnessException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
         }
 
-        servicePackageRepository.delete(servicePackage);
+        servicePackage.setDeleted(true);
+        servicePackage.setDeletedAt(LocalDateTime.now());
+        servicePackage.setDeletedByUser(securityUtil.getCurrentUser());
+        servicePackageRepository.save(servicePackage);
 
         return servicePackageId;
     }

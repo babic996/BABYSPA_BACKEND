@@ -67,4 +67,54 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     List<Reservation> findByTenantIdAndIsDeleted(String tenantId, boolean isDeleted);
 
+    @Query(value = """
+            SELECT r.*
+            FROM reservation r
+            JOIN status s ON r.status_id = s.status_id
+            JOIN arrangement a ON r.arrangement_id = a.arrangement_id
+            WHERE (:statusId IS NULL OR s.status_id = :statusId)
+            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
+            AND (r.start_date >= :startDate AND r.start_date <= :endDate)
+            AND (r.tenant_id = :tenantId)
+            AND (r.is_deleted = :isDeleted)
+            ORDER BY
+                 CASE
+                     WHEN r.start_date::date = CURRENT_DATE THEN 1
+                     WHEN r.start_date > NOW() THEN 2
+                     ELSE 3
+                 END,
+                 CASE
+                     WHEN r.start_date > NOW() THEN r.start_date
+                     ELSE r.start_date
+                 END DESC,
+            r.start_date ASC
+            """, nativeQuery = true)
+    List<Reservation> findAllReservationNativeWithStartDateAndDate(@Param("statusId") Integer statusId, @Param("arrangementId") Integer arrangementId,
+                                                                   @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate,
+                                                                   @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
+
+    @Query(value = """
+            SELECT r.*
+            FROM reservation r
+            JOIN status s ON r.status_id = s.status_id
+            JOIN arrangement a ON r.arrangement_id = a.arrangement_id
+            WHERE (:statusId IS NULL OR s.status_id = :statusId)
+            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
+            AND (r.tenant_id = :tenantId)
+            AND (r.is_deleted = :isDeleted)
+            ORDER BY
+                 CASE
+                     WHEN r.start_date::date = CURRENT_DATE THEN 1
+                     WHEN r.start_date > NOW() THEN 2
+                     ELSE 3
+                 END,
+                 CASE
+                     WHEN r.start_date > NOW() THEN r.start_date
+                     ELSE r.start_date
+                 END DESC,
+            r.start_date ASC
+            """, nativeQuery = true)
+    List<Reservation> findAllReservationNative(@Param("statusId") Integer statusId, @Param("arrangementId") Integer arrangementId,
+                                               @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
+
 }
