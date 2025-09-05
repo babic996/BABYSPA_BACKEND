@@ -1,5 +1,6 @@
 package com.backend.babyspa.v1.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -78,22 +80,34 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers(permitAllURLs).permitAll()
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(permitAllURLs).permitAll()
                         .requestMatchers(servicePackageURLs).hasAnyRole("SERVICE_PACKAGE_MAINTAINER", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers(reservationURLs).hasAnyRole("RESERVATION_MAINTAINER", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers(arrangementURLs).hasAnyRole("ARRANGEMENT_MAINTAINER", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers(reportURLs).hasAnyRole("REPORT_OVERVIEW", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers(superAdminURLs).hasRole("SUPER_ADMIN")
-                        .requestMatchers(Stream.concat(Arrays.stream(userModifyingURLs), Arrays.stream(giftCardURLs)).toArray(String[]::new)).hasAnyRole("SUPER_ADMIN", "ADMIN")
+                        .requestMatchers(Stream.concat(Arrays.stream(userModifyingURLs), Arrays.stream(giftCardURLs)).toArray(String[]::new))
+                        .hasAnyRole("SUPER_ADMIN", "ADMIN")
                         .requestMatchers(babyURLs).hasAnyRole("BABY_MAINTAINER", "ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class).build();
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        };
     }
 
     @Bean
