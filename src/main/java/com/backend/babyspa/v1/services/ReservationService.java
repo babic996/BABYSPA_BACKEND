@@ -69,7 +69,7 @@ public class ReservationService {
 
         return reservationRepository.findByArrangementAndIsDeleted(arrangement, false)
                 .stream()
-                .map(r -> new ReservationShortInfo(r.getStartDate(), r.getEndDate(), r.getStatus().getStatusName()))
+                .map(r -> new ReservationShortInfo(r.getStartDate(), r.getEndDate(), r.getStatus().getStatusName(), r.getStatus().getStatusCode()))
                 .toList();
     }
 

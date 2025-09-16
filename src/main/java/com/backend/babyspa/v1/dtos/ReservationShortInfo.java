@@ -13,7 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReservationShortInfo {
 
-	private LocalDateTime startDate;
-	private LocalDateTime endDate;
-	private String statusName;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private String statusName;
+    private String statusCode;
 }

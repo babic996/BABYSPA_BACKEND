@@ -346,7 +346,7 @@ public class ArrangementService {
                 .setServicePackage(new ShortDetailsDto(arrangement.getServicePackage().getServicePackageId(),
                         arrangement.getServicePackage().getServicePackageName()));
         findAllArrangementDto.setStatus(
-                new ShortDetailsDto(arrangement.getStatus().getStatusId(), arrangement.getStatus().getStatusName()));
+                new ShortDetailsDto(arrangement.getStatus().getStatusId(), arrangement.getStatus().getStatusCode()));
         if (Objects.nonNull(arrangement.getPaymentType())) {
             findAllArrangementDto.setPaymentType(new ShortDetailsDto(arrangement.getPaymentType().getPaymentTypeId(),
                     arrangement.getPaymentType().getPaymentTypeName()));
