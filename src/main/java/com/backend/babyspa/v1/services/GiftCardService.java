@@ -76,7 +76,7 @@ public class GiftCardService {
             if (Objects.nonNull(arrangementId) && !isUsed) {
                 Arrangement arrangement = arrangementRepository.findById(arrangementId)
                         .orElseThrow(() -> new NotFoundException("Ne postoji aranžman sa ID: " + arrangementId + "!"));
-                if (Objects.nonNull(arrangement) && Objects.nonNull(arrangement.getGiftCard()) && arrangement.getGiftCard().isUsed()) {
+                if (Objects.nonNull(arrangement) && Objects.nonNull(arrangement.getGiftCard())) {
                     giftCardsList.add(arrangement.getGiftCard());
                 }
             }

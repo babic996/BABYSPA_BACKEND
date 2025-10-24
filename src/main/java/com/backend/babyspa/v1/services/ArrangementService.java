@@ -79,24 +79,30 @@ public class ArrangementService {
         Status status = statusService.findByStatusCode(createdStatus);
         ServicePackage servicePackage = servicePackageService.findById(createArrangementDto.getServicePackageId());
 
-        if (Objects.nonNull(createArrangementDto.getDiscountId())
-                && !Objects.equals(createArrangementDto.getDiscountId(), 0)) {
+        if (Objects.nonNull(createArrangementDto.getDiscountId())) {
             Discount discount = discountService.findById(createArrangementDto.getDiscountId());
             arrangement.setDiscount(discount);
             if (discount.isPrecentage()) {
                 BigDecimal discountValue = servicePackage.getPrice().multiply(discount.getValue())
                         .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                 arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
-
             } else {
                 if (discount.getValue().compareTo(servicePackage.getPrice()) > 0) {
-                    throw new BuisnessException("Popust je veći od cijene aranžmana!");
+                    throw new BuisnessException("Popust je veći od cijene paketa usluge!");
                 } else {
                     arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
                 }
             }
         } else {
             arrangement.setPrice(servicePackage.getPrice());
+        }
+
+        if (Objects.nonNull(createArrangementDto.getGiftCardId())) {
+            if (Objects.isNull(arrangement.getDiscount())) {
+                throw new BuisnessException("Morate izabrati popust!");
+            } else {
+                arrangement.setGiftCard(giftCardService.findById(createArrangementDto.getGiftCardId()));
+            }
         }
 
         arrangement.setNote(createArrangementDto.getNote());
@@ -136,9 +142,6 @@ public class ArrangementService {
         if (!Objects.equals(updateArrangementDto.getPaymentTypeId(), 0)
                 && Objects.nonNull(updateArrangementDto.getPaymentTypeId())) {
             PaymentType paymentType = paymentTypeService.findById(updateArrangementDto.getPaymentTypeId());
-            if (paymentType.getPaymentTypeCode().equals("gift") && Objects.isNull(updateArrangementDto.getGiftCardId())) {
-                throw new BuisnessException("Morate izabrati poklon karticu!");
-            }
             arrangement.setPaymentType(paymentType);
         } else {
             arrangement.setPaymentType(null);
@@ -169,9 +172,10 @@ public class ArrangementService {
             arrangement.setDiscount(null);
         }
 
-        if (Objects.nonNull(updateArrangementDto.getGiftCardId())
-                && Objects.nonNull(arrangement.getPaymentType())
-                && arrangement.getPaymentType().getPaymentTypeCode().equals("gift")) {
+        if (Objects.nonNull(updateArrangementDto.getGiftCardId())) {
+            if (Objects.isNull(arrangement.getDiscount())) {
+                throw new BuisnessException("Morate izabrati popust!");
+            }
             GiftCard giftCard = giftCardService.findById(updateArrangementDto.getGiftCardId());
             if (Objects.nonNull(giftCard.getExpirationDate())) {
                 LocalDate expirationDate = giftCard.getExpirationDate().toLocalDate();
