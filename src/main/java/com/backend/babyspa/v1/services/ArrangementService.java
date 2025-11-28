@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.models.*;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +88,7 @@ public class ArrangementService {
                 arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
             } else {
                 if (discount.getValue().compareTo(servicePackage.getPrice()) > 0) {
-                    throw new BuisnessException("Popust je veći od cijene paketa usluge!");
+                    throw new BusinessException("Popust je veći od cijene paketa usluge!");
                 } else {
                     arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
                 }
@@ -99,7 +99,7 @@ public class ArrangementService {
 
         if (Objects.nonNull(createArrangementDto.getGiftCardId())) {
             if (Objects.isNull(arrangement.getDiscount())) {
-                throw new BuisnessException("Morate izabrati popust!");
+                throw new BusinessException("Morate izabrati popust!");
             } else {
                 arrangement.setGiftCard(giftCardService.findById(createArrangementDto.getGiftCardId()));
             }
@@ -162,7 +162,7 @@ public class ArrangementService {
 
             } else {
                 if (discount.getValue().compareTo(arrangement.getPrice()) > 0) {
-                    throw new BuisnessException("Popust je veći od cijene aranžmana!");
+                    throw new BusinessException("Popust je veći od cijene aranžmana!");
                 } else {
                     arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
                 }
@@ -174,14 +174,14 @@ public class ArrangementService {
 
         if (Objects.nonNull(updateArrangementDto.getGiftCardId())) {
             if (Objects.isNull(arrangement.getDiscount())) {
-                throw new BuisnessException("Morate izabrati popust!");
+                throw new BusinessException("Morate izabrati popust!");
             }
             GiftCard giftCard = giftCardService.findById(updateArrangementDto.getGiftCardId());
             if (Objects.nonNull(giftCard.getExpirationDate())) {
                 LocalDate expirationDate = giftCard.getExpirationDate().toLocalDate();
                 LocalDate today = LocalDate.now();
                 if (today.isAfter(expirationDate)) {
-                    throw new BuisnessException("Poklon kartica je istekla!");
+                    throw new BusinessException("Poklon kartica je istekla!");
                 }
             }
             if (Objects.nonNull(arrangement.getGiftCard()) && !giftCard.equals(arrangement.getGiftCard())) {
@@ -228,7 +228,7 @@ public class ArrangementService {
 
         if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
 
-            throw new BuisnessException("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
+            throw new BusinessException("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
         }
 
         arrangement.setDeleted(true);
@@ -307,7 +307,7 @@ public class ArrangementService {
 
     public List<ShortDetailsDto> findAllArrangementList() {
         return arrangementRepository
-                .findByRemainingTermGreaterThanAndTenantIdAndIsDeleted(0, TenantContext.getTenant(), false).stream()
+                .findByRemainingTermGreaterThanAndIsDeleted(0, false).stream()
                 .map(this::buildShortDetailsFromArrangement).toList();
     }
 

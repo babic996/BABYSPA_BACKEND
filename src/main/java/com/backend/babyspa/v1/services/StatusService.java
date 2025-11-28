@@ -2,7 +2,7 @@ package com.backend.babyspa.v1.services;
 
 import java.util.List;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class StatusService {
 
         if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(createStatusDto.getStatusName(),
                 createStatusDto.getStatusCode(), statusType)) {
-            throw new BuisnessException("Postoji status sa ovom kombinacijom imena i koda!");
+            throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
         }
         Status status = new Status();
 
@@ -55,7 +55,7 @@ public class StatusService {
 
         if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(updateStatusDto.getStatusName(),
                 updateStatusDto.getStatusCode(), statusType, updateStatusDto.getStatusId())) {
-            throw new BuisnessException("Postoji status sa ovom kombinacijom imena i koda!");
+            throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
         }
         Status status = findById(updateStatusDto.getStatusId());
 

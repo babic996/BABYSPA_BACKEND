@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,7 +42,7 @@ public class ServicePackageService {
 
     public ServicePackage save(CreateServicePackageDto createServicePackageDto) {
         if (servicePackageRepository.existsByServicePackageNameAndIsDeleted(createServicePackageDto.getServicePackageName(), false)) {
-            throw new BuisnessException(
+            throw new BusinessException(
                     "Postoji paket usluge sa imenom: " + createServicePackageDto.getServicePackageName() + "!");
         }
         ServicePackage servicePackage = new ServicePackage();
@@ -60,7 +60,7 @@ public class ServicePackageService {
     public ServicePackage update(UpdateServicePackageDto updateServicePackageDto) {
         if (servicePackageRepository.existsByServicePackageNameAndServicePackageIdNotAndIsDeleted(
                 updateServicePackageDto.getServicePackageName(), updateServicePackageDto.getServicePackageId(), false)) {
-            throw new BuisnessException(
+            throw new BusinessException(
                     "Postoji paket usluge sa imenom: " + updateServicePackageDto.getServicePackageName() + "!");
         }
         ServicePackage servicePackage = findById(updateServicePackageDto.getServicePackageId());
@@ -86,7 +86,7 @@ public class ServicePackageService {
     public int delete(int servicePackageId) {
         ServicePackage servicePackage = findById(servicePackageId);
         if (arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false)) {
-            throw new BuisnessException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
+            throw new BusinessException("Nije moguće obrisati paket usluge ako postoji aranžman kojem je dodijeljen.");
         }
 
         servicePackage.setDeleted(true);
@@ -98,12 +98,12 @@ public class ServicePackageService {
     }
 
     public List<ShortDetailsDto> findAllList() {
-        return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
+        return servicePackageRepository.findAllByIsDeleted(false).stream()
                 .map(this::buildShortDetailsDtoFromServicePackage).toList();
     }
 
     public List<ServicePackage> findAll() {
-        return servicePackageRepository.findAllByTenantIdAndIsDeleted(TenantContext.getTenant(), false);
+        return servicePackageRepository.findAllByIsDeleted(false);
     }
 
     private ShortDetailsDto buildShortDetailsDtoFromServicePackage(ServicePackage servicePackage) {
@@ -125,7 +125,7 @@ public class ServicePackageService {
     // ovaj se servis koristi samo za izvjestaje jer se izvjestaji generisu preko
     // schedulera
     public List<ServicePackage> findAllByTenantForReport(String tenantId) {
-        return servicePackageRepository.findAllByTenantIdAndIsDeleted(tenantId, false);
+        return servicePackageRepository.findAllByIsDeleted(false);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.backend.babyspa.v1.repositories;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +20,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmailAndUserIdNot(String email, int userId);
 
-    List<User> findByTenantId(String tenantId);
+    // rely on inherited findAll()
 }

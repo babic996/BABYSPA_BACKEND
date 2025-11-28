@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,9 +42,9 @@ public class BabyService {
     }
 
     public Baby save(CreateBabyDto createBabyDto) {
-        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndIsDeleted(createBabyDto.getPhoneNumber(),
-                createBabyDto.getBabyName(), TenantContext.getTenant(), false)) {
-            throw new BuisnessException("Ova beba je već unesena u sistem!");
+        if (babyRepository.existsByPhoneNumberAndBabyNameAndIsDeleted(createBabyDto.getPhoneNumber(),
+                createBabyDto.getBabyName(), false)) {
+            throw new BusinessException("Ova beba je već unesena u sistem!");
         }
         Baby baby = new Baby();
 
@@ -61,9 +61,9 @@ public class BabyService {
     }
 
     public Baby update(UpdateBabyDto updateBabyDto) {
-        if (babyRepository.existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNotAndIsDeleted(updateBabyDto.getPhoneNumber(),
-                updateBabyDto.getBabyName(), TenantContext.getTenant(), updateBabyDto.getBabyId(), false)) {
-            throw new BuisnessException("Ova beba je već unesena u sistem!");
+        if (babyRepository.existsByPhoneNumberAndBabyNameAndBabyIdNotAndIsDeleted(updateBabyDto.getPhoneNumber(),
+                updateBabyDto.getBabyName(), updateBabyDto.getBabyId(), false)) {
+            throw new BusinessException("Ova beba je već unesena u sistem!");
         }
         Baby baby = findById(updateBabyDto.getBabyId());
 
@@ -84,7 +84,7 @@ public class BabyService {
         Baby baby = findById(babyId);
 
         if (arrangementRepository.existsByBabyAndIsDeleted(baby, false)) {
-            throw new BuisnessException("Nije moguće obrisati bebu ako postoji aranžman kojem je dodijeljena.");
+            throw new BusinessException("Nije moguće obrisati bebu ako postoji aranžman kojem je dodijeljena.");
         }
 
         baby.setDeleted(true);
@@ -113,7 +113,7 @@ public class BabyService {
     }
 
     public List<ShortDetailsDto> findAllList() {
-        return babyRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
+        return babyRepository.findByIsDeleted(false).stream()
                 .map(this::buildShortDetailsDtoFromBaby).toList();
     }
 

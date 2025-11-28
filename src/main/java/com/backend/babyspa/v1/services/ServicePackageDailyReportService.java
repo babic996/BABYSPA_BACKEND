@@ -77,16 +77,16 @@ public class ServicePackageDailyReportService {
     }
 
     public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
-        return servicePackageDailyReportRepository.existsByDateAndTenantId(date, tenantId);
+        return servicePackageDailyReportRepository.existsByDate(date);
     }
 
     @Transactional
     public void deleteAllByTenantId(String tenantId) {
-        servicePackageDailyReportRepository.deleteByTenantId(tenantId);
+        servicePackageDailyReportRepository.deleteAll();
     }
 
     @Transactional
     public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
-        servicePackageDailyReportRepository.deleteByDateAndTenantId(date, tenantId);
+        servicePackageDailyReportRepository.deleteByDate(date);
     }
 }

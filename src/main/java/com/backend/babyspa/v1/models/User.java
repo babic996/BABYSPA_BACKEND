@@ -10,14 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.hibernate.annotations.Filter;
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "application_user")
-public class User {
+public class User extends TenantEntity {
 
     @Id
     @Column(name = "user_id", nullable = false)
@@ -39,9 +40,6 @@ public class User {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
-
     public User(String email, String username, String password, String firstName, String lastName, String tenantId) {
 
         this.email = email;
@@ -49,7 +47,6 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.tenantId = tenantId;
     }
 
     @Override

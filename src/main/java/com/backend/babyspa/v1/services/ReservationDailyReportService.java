@@ -83,19 +83,16 @@ public class ReservationDailyReportService {
     }
 
     public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
-
-        return reservationDailyReportRepository.existsByDateAndTenantId(date, tenantId);
+        return reservationDailyReportRepository.existsByDate(date);
     }
 
     @Transactional
     public void deleteAllByTenantId(String tenantId) {
-
-        reservationDailyReportRepository.deleteByTenantId(tenantId);
+        reservationDailyReportRepository.deleteAll();
     }
 
     @Transactional
     public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
-
-        reservationDailyReportRepository.deleteByDateAndTenantId(date, tenantId);
+        reservationDailyReportRepository.deleteByDate(date);
     }
 }

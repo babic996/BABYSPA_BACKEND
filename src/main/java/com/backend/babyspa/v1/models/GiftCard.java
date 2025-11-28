@@ -7,14 +7,17 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.hibernate.annotations.Filter;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "gift_card")
 @EqualsAndHashCode(of = "serialNumber")
-public class GiftCard {
+public class GiftCard extends TenantEntity {
 
     @Id
     @Column(name = "gift_card_id", nullable = false)
@@ -29,9 +32,6 @@ public class GiftCard {
 
     @Column(name = "used", nullable = false)
     private boolean used = false;
-
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
 
     @Override
     public String toString() {

@@ -17,7 +17,7 @@ import com.backend.babyspa.v1.models.ServicePackage;
 @Repository
 public interface ArrangementRepository extends JpaRepository<Arrangement, Integer> {
 
-    List<Arrangement> findByRemainingTermGreaterThanAndTenantIdAndIsDeleted(int remainingTerm, String tenantId, boolean isDeleted);
+    List<Arrangement> findByRemainingTermGreaterThanAndIsDeleted(int remainingTerm, boolean isDeleted);
 
     boolean existsByServicePackageAndIsDeleted(ServicePackage servicePackage, boolean isDeleted);
 

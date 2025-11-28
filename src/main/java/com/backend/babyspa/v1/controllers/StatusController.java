@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +23,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/status")
-public class StatusController extends BaseController {
+public class StatusController {
 
     @Autowired
     StatusService statusService;
@@ -36,23 +35,13 @@ public class StatusController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Status>> save(@RequestBody @Valid CreateStatusDto createStatusDto,
-                                                    BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Status>> save(@RequestBody @Valid CreateStatusDto createStatusDto) {
 
         return ResponseEntity.ok(ApiResponse.success(statusService.save(createStatusDto)));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ApiResponse<Status>> update(@RequestBody @Valid UpdateStatusDto updateStatusDto,
-                                                      BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Status>> update(@RequestBody @Valid UpdateStatusDto updateStatusDto) {
 
         return ResponseEntity.ok(ApiResponse.success(statusService.update(updateStatusDto)));
     }

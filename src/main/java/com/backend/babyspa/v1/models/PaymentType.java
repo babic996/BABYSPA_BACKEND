@@ -1,5 +1,7 @@
 package com.backend.babyspa.v1.models;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,8 +18,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "payment_type")
-public class PaymentType {
+public class PaymentType extends TenantEntity {
 
     @Id
     @Column(name = "payment_type_id", nullable = false)

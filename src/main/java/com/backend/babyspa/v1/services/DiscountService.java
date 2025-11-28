@@ -2,11 +2,10 @@ package com.backend.babyspa.v1.services;
 
 import java.util.List;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.CreateDiscountDto;
 import com.backend.babyspa.v1.dtos.UpdateDiscountDto;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
@@ -30,7 +29,7 @@ public class DiscountService {
     public Discount save(CreateDiscountDto createDiscountDto) {
         if (discountRepository.existsByValueAndIsPrecentage(createDiscountDto.getValue(),
                 createDiscountDto.getIsPrecentage())) {
-            throw new BuisnessException("Postoji popust sa unijetim parametrima!");
+            throw new BusinessException("Postoji popust sa unijetim parametrima!");
         }
         Discount discount = new Discount();
 
@@ -49,7 +48,7 @@ public class DiscountService {
     public Discount update(UpdateDiscountDto updateDiscountDto) {
         if (discountRepository.existsByValueAndIsPrecentageAndDiscountIdNot(updateDiscountDto.getValue(),
                 updateDiscountDto.getIsPrecentage(), updateDiscountDto.getDisountId())) {
-            throw new BuisnessException("Postoji popust sa unijetim parametrima!");
+            throw new BusinessException("Postoji popust sa unijetim parametrima!");
         }
         Discount discount = findById(updateDiscountDto.getDisountId());
 
@@ -74,7 +73,6 @@ public class DiscountService {
     }
 
     public List<Discount> findAll() {
-
-        return discountRepository.findByTenantId(TenantContext.getTenant());
+        return discountRepository.findAll();
     }
 }

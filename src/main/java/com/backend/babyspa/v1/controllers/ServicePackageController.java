@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.backend.babyspa.v1.dtos.CreateServicePackageDto;
 import com.backend.babyspa.v1.dtos.ShortDetailsDto;
 import com.backend.babyspa.v1.dtos.UpdateServicePackageDto;
-import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.ServicePackage;
 import com.backend.babyspa.v1.services.ServicePackageService;
 import com.backend.babyspa.v1.utils.ApiResponse;
@@ -28,7 +26,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/service-package")
-public class ServicePackageController extends BaseController {
+public class ServicePackageController {
 
     @Autowired
     ServicePackageService servicePackageService;
@@ -41,22 +39,14 @@ public class ServicePackageController extends BaseController {
 
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<ServicePackage>> save(
-            @RequestBody @Valid CreateServicePackageDto createServicePackageDto, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+            @RequestBody @Valid CreateServicePackageDto createServicePackageDto) {
 
         return ResponseEntity.ok(ApiResponse.success(servicePackageService.save(createServicePackageDto)));
     }
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<ServicePackage>> update(
-            @RequestBody @Valid UpdateServicePackageDto updateServicePackageDto, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+            @RequestBody @Valid UpdateServicePackageDto updateServicePackageDto) {
 
         return ResponseEntity.ok(ApiResponse.success(servicePackageService.update(updateServicePackageDto)));
     }

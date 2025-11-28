@@ -17,7 +17,7 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 
 @RestController
 @RequestMapping("/service-package-daily-report")
-public class ServicePackageDailyReportController extends BaseController {
+public class ServicePackageDailyReportController {
 
     @Autowired
     ServicePackageDailyReportService servicePackageDailyReportService;

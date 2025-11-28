@@ -14,7 +14,7 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 
 @RestController
 @RequestMapping("/role")
-public class RoleController extends BaseController {
+public class RoleController {
 
     @Autowired
     RoleService roleService;

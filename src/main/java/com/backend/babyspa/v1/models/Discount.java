@@ -2,6 +2,8 @@ package com.backend.babyspa.v1.models;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,8 +20,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "discount")
-public class Discount {
+public class Discount extends TenantEntity {
 
     @Id
     @Column(name = "discount_id", nullable = false)
@@ -35,14 +38,10 @@ public class Discount {
     @Column(name = "discount_name", nullable = false)
     private String discountName;
 
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
-
     public Discount(BigDecimal value, boolean isPrecentage, String discountName, String tenantId) {
         this.value = value;
         this.isPrecentage = isPrecentage;
         this.discountName = discountName;
-        this.tenantId = tenantId;
     }
 
     @Override

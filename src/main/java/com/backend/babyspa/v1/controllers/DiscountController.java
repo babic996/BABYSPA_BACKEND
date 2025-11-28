@@ -2,10 +2,8 @@ package com.backend.babyspa.v1.controllers;
 
 import java.util.List;
 
-import com.backend.babyspa.v1.models.Reservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +23,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/discount")
-public class DiscountController extends BaseController {
+public class DiscountController {
 
     @Autowired
     DiscountService discountService;
@@ -37,23 +35,13 @@ public class DiscountController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Discount>> save(@RequestBody @Valid CreateDiscountDto createDiscountDto,
-                                                      BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Discount>> save(@RequestBody @Valid CreateDiscountDto createDiscountDto) {
 
         return ResponseEntity.ok(ApiResponse.success(discountService.save(createDiscountDto)));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ApiResponse<Discount>> update(@RequestBody @Valid UpdateDiscountDto updateDiscountDto,
-                                                        BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Discount>> update(@RequestBody @Valid UpdateDiscountDto updateDiscountDto) {
 
         return ResponseEntity.ok(ApiResponse.success(discountService.update(updateDiscountDto)));
     }

@@ -1,7 +1,7 @@
 package com.backend.babyspa.v1.service.unit;
 
 import com.backend.babyspa.v1.dtos.CreateArrangementDto;
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.models.*;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.services.*;
@@ -182,7 +182,7 @@ class ArrangementServiceUnitTest {
         when(discountService.findById(1)).thenReturn(mockDiscount);
 
         // When & Then
-        BuisnessException exception = assertThrows(BuisnessException.class,
+        BusinessException exception = assertThrows(BusinessException.class,
                 () -> arrangementService.save(dto));
 
         assertEquals("Popust je veći od cijene paketa usluge!", exception.getMessage());
@@ -203,7 +203,7 @@ class ArrangementServiceUnitTest {
         when(servicePackageService.findById(1)).thenReturn(mockServicePackage);
 
         // When & Then
-        BuisnessException exception = assertThrows(BuisnessException.class,
+        BusinessException exception = assertThrows(BusinessException.class,
                 () -> arrangementService.save(dto));
 
         assertEquals("Morate izabrati popust!", exception.getMessage());

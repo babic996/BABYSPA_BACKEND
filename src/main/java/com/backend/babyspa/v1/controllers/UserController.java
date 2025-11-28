@@ -1,11 +1,9 @@
 package com.backend.babyspa.v1.controllers;
 
-import com.backend.babyspa.v1.models.Reservation;
 import com.backend.babyspa.v1.services.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,7 +30,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
-public class UserController extends BaseController {
+public class UserController {
 
     @Autowired
     UserService userService;
@@ -60,34 +58,24 @@ public class UserController extends BaseController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<User>> register(@RequestBody @Valid RegisterNewUserDto registerNewUserDto,
-                                                      Authentication authentication, BindingResult bindingResult) {
+                                                      Authentication authentication) {
 
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
-
+    
         return ResponseEntity.ok(ApiResponse.success(userService.register(registerNewUserDto, authentication)));
     }
 
     @PostMapping("/add-new-tenant")
     public ResponseEntity<ApiResponse<User>> addNewTenant(@RequestBody AddNewTenantUserDto addNewTenantUserDto,
-                                                          Authentication authentication, BindingResult bindingResult) {
+                                                          Authentication authentication) {
 
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
-
+        
         return ResponseEntity.ok(ApiResponse.success(userService.addNewTenantUser(addNewTenantUserDto, authentication)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody @Valid LoginDto loginDto,
-                                                               BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody @Valid LoginDto loginDto) {
 
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
-
+ 
         return ResponseEntity.ok(ApiResponse.success(userService.loginUser(loginDto)));
     }
 
@@ -100,11 +88,7 @@ public class UserController extends BaseController {
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<User>> update(@RequestBody @Valid UpdateUserDto updateUserDto,
-                                                    Authentication authentication, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+                                                    Authentication authentication) {
 
         return ResponseEntity.ok(ApiResponse.success(userService.updateUser(updateUserDto, authentication)));
     }

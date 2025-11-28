@@ -17,7 +17,7 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 
 @RestController
 @RequestMapping("/reservation-daily-report")
-public class ReservationDailyReportController extends BaseController {
+public class ReservationDailyReportController {
 
     @Autowired
     ReservationDailyReportService reservationDailyReportService;

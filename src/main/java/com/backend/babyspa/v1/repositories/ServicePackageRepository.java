@@ -34,6 +34,6 @@ public interface ServicePackageRepository extends JpaRepository<ServicePackage, 
                                                      @Param("priceStart") BigDecimal priceStart, @Param("priceEnd") BigDecimal priceEnd,
                                                      @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted, Pageable pageable);
 
-    List<ServicePackage> findAllByTenantIdAndIsDeleted(String tenantId, boolean isDeleted);
+    List<ServicePackage> findAllByIsDeleted(boolean isDeleted);
 
 }

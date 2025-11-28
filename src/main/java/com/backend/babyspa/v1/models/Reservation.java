@@ -2,6 +2,8 @@ package com.backend.babyspa.v1.models;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +22,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "reservation")
-public class Reservation {
+public class Reservation extends TenantEntity {
 
     @Id
     @Column(name = "reservation_id", nullable = false)
@@ -45,9 +48,6 @@ public class Reservation {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
 
     @ManyToOne
     @JoinColumn(name = "arrangement_id", nullable = false)

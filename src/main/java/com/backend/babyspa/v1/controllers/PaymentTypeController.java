@@ -14,7 +14,7 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 
 @RestController
 @RequestMapping("/payment-type")
-public class PaymentTypeController extends BaseController {
+public class PaymentTypeController {
 
     @Autowired
     PaymentTypeService paymentTypeService;

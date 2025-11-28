@@ -14,14 +14,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "baby")
-public class Baby {
+public class Baby extends TenantEntity {
 
     @Id
     @Column(name = "baby_id", nullable = false)
@@ -48,9 +50,6 @@ public class Baby {
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
-
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
 
     @Column(name = "is_deleted")
     private boolean isDeleted = false;

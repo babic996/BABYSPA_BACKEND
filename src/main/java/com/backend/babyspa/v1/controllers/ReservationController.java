@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/reservation")
-public class ReservationController extends BaseController {
+public class ReservationController {
 
     @Autowired
     ReservationService reservationService;
@@ -48,22 +47,14 @@ public class ReservationController extends BaseController {
 
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<ReservationFindAllDto>> save(
-            @RequestBody @Valid CreateReservationDto createReservationDto, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+            @RequestBody @Valid CreateReservationDto createReservationDto) {
 
         return ResponseEntity.ok(ApiResponse.success(reservationService.save(createReservationDto)));
     }
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<ReservationFindAllDto>> update(
-            @RequestBody @Valid UpdateReservationDto updateReservationDto, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+            @RequestBody @Valid UpdateReservationDto updateReservationDto) {
 
         return ResponseEntity.ok(ApiResponse.success(reservationService.update(updateReservationDto)));
     }

@@ -17,11 +17,11 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 
 	List<ReservationDailyReport> findByStatus(Status status);
 
-	boolean existsByDateAndTenantId(LocalDate date, String tenantId);
+    boolean existsByDate(LocalDate date);
 
-	void deleteByDateAndTenantId(LocalDate date, String tenantId);
+    void deleteByDate(LocalDate date);
 
-	void deleteByTenantId(String tenantId);
+    void deleteAll();
 
 	@Query(value = """
 			SELECT

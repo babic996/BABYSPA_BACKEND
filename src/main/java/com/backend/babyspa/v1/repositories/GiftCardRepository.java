@@ -1,7 +1,5 @@
 package com.backend.babyspa.v1.repositories;
 
-import com.backend.babyspa.v1.models.Arrangement;
-import com.backend.babyspa.v1.models.Discount;
 import com.backend.babyspa.v1.models.GiftCard;
 import com.backend.babyspa.v1.projections.FindAllGiftCardDto;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,13 +14,13 @@ import java.util.Optional;
 @Repository
 public interface GiftCardRepository extends JpaRepository<GiftCard, Integer> {
 
-    boolean existsBySerialNumberAndTenantId(String serialNumber, String tenantId);
+    boolean existsBySerialNumber(String serialNumber);
 
-    boolean existsBySerialNumberAndTenantIdAndGiftCardIdNot(String serialNumber, String tenantId, int giftCardId);
+    boolean existsBySerialNumberAndGiftCardIdNot(String serialNumber, int giftCardId);
 
-    Optional<GiftCard> findBySerialNumberAndTenantId(String serialNumber, String tenantId);
+    Optional<GiftCard> findBySerialNumber(String serialNumber);
 
-    List<GiftCard> findByUsedAndTenantId(boolean isUsed, String tenantId);
+    List<GiftCard> findByUsed(boolean isUsed);
 
     @Query(value = """
             SELECT gc.*, a.arrangement_id, b.phone_number

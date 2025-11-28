@@ -1,7 +1,7 @@
 package com.backend.babyspa.v1.services;
 
 import com.backend.babyspa.v1.dtos.AssignRolesDto;
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Role;
 import com.backend.babyspa.v1.models.User;
@@ -35,7 +35,7 @@ public class UserRoleService {
         boolean hasPermission = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN") || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
         if (!hasPermission) {
-            throw new BuisnessException("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
+            throw new BusinessException("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
         }
 
         User user = userRepository.findById(assignRolesDto.getUserId())

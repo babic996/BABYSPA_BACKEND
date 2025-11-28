@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -74,9 +74,9 @@ public class UserService {
         List<UserInfoDto> users;
 
         if (Objects.isNull(excludedRoleNames) || excludedRoleNames.isEmpty()) {
-            users = userRepository.findByTenantId(TenantContext.getTenant()).stream().map(this::buildUserInfoFromUser).toList();
+            users = userRepository.findAll().stream().map(this::buildUserInfoFromUser).toList();
         } else {
-            users = userRepository.findByTenantId(TenantContext.getTenant()).stream()
+            users = userRepository.findAll().stream()
                     .map(this::buildUserInfoFromUser)
                     .filter(userInfo -> userInfo.getRoles().stream()
                             .map(Role::getRoleName)
@@ -98,7 +98,7 @@ public class UserService {
                         || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
         if (!hasPermission) {
-            throw new BuisnessException("Ovaj korisnik nema ovlaštenje da kreira naloge.");
+            throw new BusinessException("Ovaj korisnik nema ovlaštenje da kreira naloge.");
         }
 
         User user = new User();
@@ -125,7 +125,7 @@ public class UserService {
         boolean hasPermission = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
         if (!hasPermission) {
-            throw new BuisnessException("Ovaj korisnik nema ovlaštenje da dodaje nove tenante.");
+            throw new BusinessException("Ovaj korisnik nema ovlaštenje da dodaje nove tenante.");
         }
 
         if (userRepository.existsByUsername(addNewTenantUserDto.getUsername())) {

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/arrangement")
-public class ArrangementController extends BaseController {
+public class ArrangementController {
 
     @Autowired
     ArrangementService arrangementService;
@@ -48,23 +47,14 @@ public class ArrangementController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Arrangement>> save(@RequestBody @Valid CreateArrangementDto createReservationDto,
-                                                         BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Arrangement>> save(@RequestBody @Valid CreateArrangementDto createReservationDto) {
 
         return ResponseEntity.ok(ApiResponse.success(arrangementService.save(createReservationDto)));
     }
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<FindAllArrangementDto>> update(
-            @RequestBody @Valid UpdateArrangementDto updateReservationDto, BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+            @RequestBody @Valid UpdateArrangementDto updateReservationDto) {
 
         return ResponseEntity.ok(ApiResponse.success(arrangementService.update(updateReservationDto)));
     }

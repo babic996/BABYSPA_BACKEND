@@ -17,12 +17,12 @@ import com.backend.babyspa.v1.models.Baby;
 @Repository
 public interface BabyRepository extends JpaRepository<Baby, Integer> {
 
-    boolean existsByPhoneNumberAndBabyNameAndTenantIdAndIsDeleted(String phoneNumber, String babyName, String tenantId, boolean isDeleted);
+    boolean existsByPhoneNumberAndBabyNameAndIsDeleted(String phoneNumber, String babyName, boolean isDeleted);
 
-    List<Baby> findByTenantIdAndIsDeleted(String tenantId, boolean isDeleted);
+    List<Baby> findByIsDeleted(boolean isDeleted);
 
-    boolean existsByPhoneNumberAndBabyNameAndTenantIdAndBabyIdNotAndIsDeleted(String phoneNumber, String babyName, String tenantId,
-                                                                              int babyId, boolean isDeleted);
+    boolean existsByPhoneNumberAndBabyNameAndBabyIdNotAndIsDeleted(String phoneNumber, String babyName,
+                                                                    int babyId, boolean isDeleted);
 
     @Query(value = """
                 SELECT *

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.backend.babyspa.v1.dtos.*;
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.projections.LocalDateProjection;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
 import com.backend.babyspa.v1.utils.SecurityUtil;
@@ -79,7 +79,7 @@ public class ReservationService {
         Status status = statusService.findByStatusCode(reservationReserved);
 
         if (arrangement.getRemainingTerm() == 0) {
-            throw new BuisnessException("Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
+            throw new BusinessException("Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
         }
 
         if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
@@ -91,7 +91,7 @@ public class ReservationService {
                             .getServicePackageDurationDays()
                             + (Objects.nonNull(arrangement.getExtendDurationDays()) ? arrangement.getExtendDurationDays() : 0))
                     .isBefore(createReservationDto.getStartDate()))) {
-                throw new BuisnessException("Nije moguće napraviti rezervaciju jer je broj dana koliko traje paket istekao!");
+                throw new BusinessException("Nije moguće napraviti rezervaciju jer je broj dana koliko traje paket istekao!");
             }
         }
 
@@ -120,7 +120,7 @@ public class ReservationService {
         if (reservation.getStatus().getStatusCode().equals(reservationCanceled)
                 && reservation.getArrangement().getRemainingTerm() == 0
                 && !status.getStatusCode().equals(reservationCanceled)) {
-            throw new BuisnessException(
+            throw new BusinessException(
                     "Nije moguće ažurirati rezervaciju jer bi broj preostalih termina aranžmana bio manji od 0!");
         } else {
             if (!reservation.getStatus().getStatusCode().equals(reservationCanceled)
@@ -180,7 +180,7 @@ public class ReservationService {
     }
 
     public List<ReservationFindAllDto> findAllList() {
-        return reservationRepository.findByTenantIdAndIsDeleted(TenantContext.getTenant(), false).stream()
+        return reservationRepository.findByIsDeleted(false).stream()
                 .map(this::buildReservationFindAllDtoFromReservation).toList();
     }
 

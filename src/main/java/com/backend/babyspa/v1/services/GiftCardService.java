@@ -3,7 +3,7 @@ package com.backend.babyspa.v1.services;
 import com.backend.babyspa.v1.config.TenantContext;
 import com.backend.babyspa.v1.dtos.CreateGiftCardDto;
 import com.backend.babyspa.v1.dtos.UpdateGiftCardDto;
-import com.backend.babyspa.v1.exceptions.BuisnessException;
+import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Arrangement;
 import com.backend.babyspa.v1.models.GiftCard;
@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,7 +33,7 @@ public class GiftCardService {
     ArrangementRepository arrangementRepository;
 
     public GiftCard findBySerialNumber(String serialNumber) {
-        return giftCardRepository.findBySerialNumberAndTenantId(serialNumber, TenantContext.getTenant())
+        return giftCardRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(() -> new NotFoundException("Nije pronađena poklon kartica sa serijskim brojem: " + serialNumber + "!"));
     }
 
@@ -45,8 +44,8 @@ public class GiftCardService {
     }
 
     public GiftCard save(CreateGiftCardDto createGiftCardDto) {
-        if (giftCardRepository.existsBySerialNumberAndTenantId(createGiftCardDto.getSerialNumber(), TenantContext.getTenant())) {
-            throw new BuisnessException("Postoji poklon kartica sa ovim serijskim brojem!");
+        if (giftCardRepository.existsBySerialNumber(createGiftCardDto.getSerialNumber())) {
+            throw new BusinessException("Postoji poklon kartica sa ovim serijskim brojem!");
         }
 
         GiftCard giftCard = new GiftCard();
@@ -57,8 +56,8 @@ public class GiftCardService {
     }
 
     public GiftCard update(UpdateGiftCardDto updateGiftCardDto) {
-        if (giftCardRepository.existsBySerialNumberAndTenantIdAndGiftCardIdNot(updateGiftCardDto.getSerialNumber(), TenantContext.getTenant(), updateGiftCardDto.getGiftCardId())) {
-            throw new BuisnessException("Postoji poklon kartica sa ovim serijskim brojem!");
+        if (giftCardRepository.existsBySerialNumberAndGiftCardIdNot(updateGiftCardDto.getSerialNumber(), updateGiftCardDto.getGiftCardId())) {
+            throw new BusinessException("Postoji poklon kartica sa ovim serijskim brojem!");
         }
 
         GiftCard giftCard = findById(updateGiftCardDto.getGiftCardId());
@@ -72,7 +71,7 @@ public class GiftCardService {
     public List<GiftCard> findAllList(Boolean isUsed, Integer arrangementId) {
         List<GiftCard> giftCardsList;
         if (Objects.nonNull(isUsed)) {
-            giftCardsList = giftCardRepository.findByUsedAndTenantId(isUsed, TenantContext.getTenant());
+            giftCardsList = giftCardRepository.findByUsed(isUsed);
             if (Objects.nonNull(arrangementId) && !isUsed) {
                 Arrangement arrangement = arrangementRepository.findById(arrangementId)
                         .orElseThrow(() -> new NotFoundException("Ne postoji aranžman sa ID: " + arrangementId + "!"));
@@ -90,7 +89,7 @@ public class GiftCardService {
     public int delete(int giftCardId) {
         GiftCard giftCard = findById(giftCardId);
         if (arrangementRepository.existsByGiftCardAndIsDeleted(giftCard, false)) {
-            throw new BuisnessException("Ova kartica je dodijeljena aranžmanu i nije moguće njeno brisanje!");
+            throw new BusinessException("Ova kartica je dodijeljena aranžmanu i nije moguće njeno brisanje!");
         }
         giftCardRepository.delete(giftCard);
         return giftCardId;

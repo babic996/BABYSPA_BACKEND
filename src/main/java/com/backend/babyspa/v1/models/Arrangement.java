@@ -3,6 +3,8 @@ package com.backend.babyspa.v1.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +23,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "arrangement")
-public class Arrangement {
+public class Arrangement extends TenantEntity {
 
     @Id
     @Column(name = "arrangement_id", nullable = false)
@@ -85,8 +88,4 @@ public class Arrangement {
     @ManyToOne
     @JoinColumn(name = "deleted_by_user_id", referencedColumnName = "user_id")
     private User deletedByUser;
-
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
-
 }

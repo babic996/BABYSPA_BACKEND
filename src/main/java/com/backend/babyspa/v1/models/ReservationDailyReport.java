@@ -2,6 +2,8 @@ package com.backend.babyspa.v1.models;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +22,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "reservation_daily_report")
-public class ReservationDailyReport {
+public class ReservationDailyReport extends TenantEntity {
 
 	@Id
 	@Column(name = "reservation_daily_report_id", nullable = false)
@@ -37,9 +40,6 @@ public class ReservationDailyReport {
 	@ManyToOne
 	@JoinColumn(name = "baby_id", nullable = false)
 	private Baby baby;
-
-	@Column(name = "tenant_id", nullable = false)
-	private String tenantId;
 
 	@ManyToOne
 	@JoinColumn(name = "status_id", nullable = true)

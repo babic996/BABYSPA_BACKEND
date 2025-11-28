@@ -8,13 +8,16 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Filter;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "arrangement_aud")
-public class ArrangementAud {
+public class ArrangementAud extends TenantEntity {
 
     @Id
     @Column(name = "arrangement_aud_id", nullable = false)
@@ -36,7 +39,4 @@ public class ArrangementAud {
 
     @JoinColumn(name = "action_at", nullable = false)
     private LocalDateTime actionAt = LocalDateTime.now();
-
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
 }

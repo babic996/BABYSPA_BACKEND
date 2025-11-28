@@ -11,38 +11,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/gift-card")
-public class GiftCardController extends BaseController {
+public class GiftCardController {
 
     @Autowired
     GiftCardService giftCardService;
 
     @PostMapping("/save")
-    public ResponseEntity<ApiResponse<GiftCard>> save(@RequestBody @Valid CreateGiftCardDto createGiftCardDto,
-                                                      BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<GiftCard>> save(@RequestBody @Valid CreateGiftCardDto createGiftCardDto) {
 
         return ResponseEntity.ok(ApiResponse.success(giftCardService.save(createGiftCardDto)));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ApiResponse<GiftCard>> update(@RequestBody @Valid UpdateGiftCardDto updateGiftCardDto,
-                                                        BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<GiftCard>> update(@RequestBody @Valid UpdateGiftCardDto updateGiftCardDto) {
 
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
         return ResponseEntity.ok(ApiResponse.success(giftCardService.update(updateGiftCardDto)));
     }
 

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +14,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "reservation_history_status")
-public class ReservationHistoryStatus {
+public class ReservationHistoryStatus extends TenantEntity {
 
     @Id
     @Column(name = "reservation_history_status_id", nullable = false)

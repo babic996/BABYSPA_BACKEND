@@ -65,7 +65,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     List<LocalDateProjection> findDistinctReservationDates(@Param("currentDateTime") LocalDateTime currentDateTime,
                                                            @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
 
-    List<Reservation> findByTenantIdAndIsDeleted(String tenantId, boolean isDeleted);
+    List<Reservation> findByIsDeleted(boolean isDeleted);
 
     @Query(value = """
             SELECT r.*

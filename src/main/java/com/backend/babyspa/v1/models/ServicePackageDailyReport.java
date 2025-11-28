@@ -14,14 +14,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "service_package_daily_report")
-public class ServicePackageDailyReport {
+public class ServicePackageDailyReport extends TenantEntity {
 
 	@Id
 	@Column(name = "service_package_daily_report_id", nullable = false)

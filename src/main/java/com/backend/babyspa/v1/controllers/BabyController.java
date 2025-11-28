@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.backend.babyspa.v1.dtos.CreateBabyDto;
 import com.backend.babyspa.v1.dtos.ShortDetailsDto;
 import com.backend.babyspa.v1.dtos.UpdateBabyDto;
-import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Baby;
 import com.backend.babyspa.v1.services.BabyService;
 import com.backend.babyspa.v1.utils.ApiResponse;
@@ -29,7 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/baby")
-public class BabyController extends BaseController {
+public class BabyController {
 
     @Autowired
     BabyService babyService;
@@ -41,23 +39,13 @@ public class BabyController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Baby>> save(@RequestBody @Valid CreateBabyDto createBabyDto,
-                                                  BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Baby>> save(@RequestBody @Valid CreateBabyDto createBabyDto) {
 
         return ResponseEntity.ok(ApiResponse.success(babyService.save(createBabyDto)));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ApiResponse<Baby>> update(@RequestBody @Valid UpdateBabyDto updateBabyDto,
-                                                    BindingResult bindingResult) {
-
-        if (hasErrors(bindingResult)) {
-            return createErrorResponse(bindingResult);
-        }
+    public ResponseEntity<ApiResponse<Baby>> update(@RequestBody @Valid UpdateBabyDto updateBabyDto) {
 
         return ResponseEntity.ok(ApiResponse.success(babyService.update(updateBabyDto)));
     }

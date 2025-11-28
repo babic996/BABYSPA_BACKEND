@@ -16,11 +16,11 @@ public interface ServicePackageDailyReportRepository extends JpaRepository<Servi
 
 	List<ServicePackageDailyReport> findAllByServicePackageIsNull();
 
-	boolean existsByDateAndTenantId(LocalDate date, String tenantId);
+    boolean existsByDate(LocalDate date);
 
-	void deleteByDateAndTenantId(LocalDate date, String tenantId);
+    void deleteByDate(LocalDate date);
 
-	void deleteByTenantId(String tenantId);
+    void deleteAll();
 
 	@Query(value = """
 			SELECT
