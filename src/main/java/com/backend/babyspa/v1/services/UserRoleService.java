@@ -57,6 +57,4 @@ public class UserRoleService {
     public List<Role> findByUser(User user) {
         return userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
     }
-
-
 }

@@ -81,5 +81,4 @@ public class StatusService {
     public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
         return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
     }
-
 }

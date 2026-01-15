@@ -35,5 +35,4 @@ public interface ServicePackageRepository extends JpaRepository<ServicePackage, 
                                                      @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted, Pageable pageable);
 
     List<ServicePackage> findAllByIsDeleted(boolean isDeleted);
-
 }

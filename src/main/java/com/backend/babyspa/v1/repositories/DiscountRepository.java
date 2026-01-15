@@ -13,7 +13,4 @@ public interface DiscountRepository extends JpaRepository<Discount, Integer> {
 	boolean existsByValueAndIsPrecentage(BigDecimal value, boolean isPrecentage);
 
 	boolean existsByValueAndIsPrecentageAndDiscountIdNot(BigDecimal value, boolean isPrecentage, int discountId);
-
-    // rely on inherited findAll()
-
 }

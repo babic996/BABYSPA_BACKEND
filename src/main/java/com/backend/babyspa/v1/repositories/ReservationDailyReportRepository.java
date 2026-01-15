@@ -130,5 +130,4 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
 			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
 			@Param("tenantId") String tenantId);
-
 }

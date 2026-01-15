@@ -116,5 +116,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
             """, nativeQuery = true)
     List<Reservation> findAllReservationNative(@Param("statusId") Integer statusId, @Param("arrangementId") Integer arrangementId,
                                                @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
-
 }

@@ -20,5 +20,4 @@ public interface StatusRepository extends JpaRepository<Status, Integer> {
 	Optional<Status> findByStatusCode(String statusCode);
 
 	List<Status> findByStatusType_StatusTypeCode(String statusTypeCode);
-
 }

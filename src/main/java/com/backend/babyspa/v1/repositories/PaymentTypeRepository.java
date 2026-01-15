@@ -8,6 +8,4 @@ import com.backend.babyspa.v1.models.PaymentType;
 
 @Repository
 public interface PaymentTypeRepository extends JpaRepository<PaymentType, Integer> {
-
-    // rely on inherited findAll()
 }

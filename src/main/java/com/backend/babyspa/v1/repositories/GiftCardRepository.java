@@ -57,6 +57,4 @@ public interface GiftCardRepository extends JpaRepository<GiftCard, Integer> {
             @Param("isUsed") Boolean isUsed, @Param("giftCardId") Integer giftCardId, @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("tenantId") String tenantId);
-
-
 }

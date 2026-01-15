@@ -65,5 +65,4 @@ public interface BabyRepository extends JpaRepository<Baby, Integer> {
             WHERE birth_date IS NOT NULL AND is_deleted = :isDeleted
             """, nativeQuery = true)
     void updateAllNumberOfMonths(@Param("now") LocalDateTime now, @Param("isDeleted") boolean isDeleted);
-
 }

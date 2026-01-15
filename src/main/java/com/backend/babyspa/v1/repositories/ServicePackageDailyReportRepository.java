@@ -125,5 +125,4 @@ public interface ServicePackageDailyReportRepository extends JpaRepository<Servi
 	List<ServicePackagesDailyReportProjection> findAllByServicePackageIdAndStartDateAndEndDateGroupByYear(
 			@Param("servicePackageId") Integer servicePackageId, @Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate, @Param("tenantId") String tenantId);
-
 }

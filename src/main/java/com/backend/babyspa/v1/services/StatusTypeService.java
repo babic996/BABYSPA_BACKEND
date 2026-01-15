@@ -17,5 +17,4 @@ public class StatusTypeService {
         return statusTypeRepository.findById(statusTypeId)
                 .orElseThrow(() -> new NotFoundException("Nije pronadjen tip status sa ID: " + statusTypeId + "!"));
     }
-
 }

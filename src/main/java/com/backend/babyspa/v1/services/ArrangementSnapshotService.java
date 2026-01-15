@@ -2,7 +2,6 @@ package com.backend.babyspa.v1.services;
 
 import com.backend.babyspa.v1.models.Arrangement;
 import com.backend.babyspa.v1.models.ArrangementSnapshot;
-import com.backend.babyspa.v1.models.User;
 import com.backend.babyspa.v1.repositories.ArrangementSnapshotRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

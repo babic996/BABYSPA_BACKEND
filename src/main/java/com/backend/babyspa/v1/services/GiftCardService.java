@@ -132,6 +132,4 @@ public class GiftCardService {
 
         return pageItem;
     }
-
-
 }
