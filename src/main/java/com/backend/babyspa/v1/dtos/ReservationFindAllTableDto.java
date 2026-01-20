@@ -13,14 +13,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReservationFindAllTableDto {
-    private int reservationId;
-    private int arrangementId;
-    private int remainingTerm;
-    private LocalDateTime createdAt;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
-    private Status status;
-    private ShortDetailsDto babyDetails;
-    private String servicePackageName;
-    private String note;
+
+  private int reservationId;
+  private int arrangementId;
+  private int remainingTerm;
+  private LocalDateTime createdAt;
+  private LocalDateTime startDate;
+  private LocalDateTime endDate;
+  private Status status;
+  private ShortDetailsDto babyDetails;
+  private String servicePackageName;
+  private String note;
 }

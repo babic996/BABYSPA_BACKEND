@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CreateGiftCardDto {
 
-    @NotNull(message = "Morate unijeti serijski broj")
-    private String serialNumber;
+  @NotNull(message = "Morate unijeti serijski broj")
+  private String serialNumber;
 
-    private LocalDateTime expirationDate;
+  private LocalDateTime expirationDate;
 }

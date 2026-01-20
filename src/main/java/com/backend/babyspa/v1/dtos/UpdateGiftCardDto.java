@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UpdateGiftCardDto {
 
-    @NotNull(message = "Morate unijeti ID poklon kartice")
-    private int giftCardId;
+  @NotNull(message = "Morate unijeti ID poklon kartice")
+  private int giftCardId;
 
-    @NotNull(message = "Morate unijeti serijski broj")
-    private String serialNumber;
+  @NotNull(message = "Morate unijeti serijski broj")
+  private String serialNumber;
 
-    private LocalDateTime expirationDate;
+  private LocalDateTime expirationDate;
 
-    @NotNull(message = "Morate unijeti da li je poklon kartica iskoristena")
-    private boolean used;
+  @NotNull(message = "Morate unijeti da li je poklon kartica iskoristena")
+  private boolean used;
 }

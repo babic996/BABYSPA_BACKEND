@@ -44,8 +44,6 @@ public class ArrangementService {
 
   @Autowired private PaymentTypeService paymentTypeService;
 
-  @Autowired private UserService userService;
-
   @Autowired private GiftCardService giftCardService;
 
   @Autowired private ArrangementAudService arrangementAudService;
@@ -351,7 +349,7 @@ public class ArrangementService {
                 + " ("
                 + arrangement.getBaby().getPhoneNumber()
                 + ")"));
-    if (Objects.nonNull(arrangement.getDiscount())) {
+    if (arrangement.getDiscount() != null) {
       String value;
       if (arrangement.getDiscount().isPrecentage()) {
         value = arrangement.getDiscount().getValue().toString() + "%";
@@ -368,14 +366,14 @@ public class ArrangementService {
     findAllArrangementDto.setStatus(
         new ShortDetailsDto(
             arrangement.getStatus().getStatusId(), arrangement.getStatus().getStatusCode()));
-    if (Objects.nonNull(arrangement.getPaymentType())) {
+    if (arrangement.getPaymentType() != null) {
       findAllArrangementDto.setPaymentType(
           new ShortDetailsDto(
               arrangement.getPaymentType().getPaymentTypeId(),
               arrangement.getPaymentType().getPaymentTypeName()));
     }
     findAllArrangementDto.setExtendDurationDays(arrangement.getExtendDurationDays());
-    if (Objects.nonNull(arrangement.getGiftCard())) {
+    if (arrangement.getGiftCard() != null) {
       findAllArrangementDto.setGiftCard(
           new ShortDetailsDto(
               arrangement.getGiftCard().getGiftCardId(),

@@ -15,8 +15,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReservationDailyReportDto {
 
-	private int numberOfReservation;
-	private LocalDate date;
-	private Status status;
-	private int babyId;
+  private int numberOfReservation;
+  private LocalDate date;
+  private Status status;
+  private int babyId;
 }

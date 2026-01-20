@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ShortDetailsDto {
 
-	private int id;
-	private String value;
+  private int id;
+  private String value;
 }

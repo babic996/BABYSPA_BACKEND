@@ -14,9 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RegisterNewUserDto extends RegisterUserDto {
 
-	@NotNull(message = "Morate unijeti username")
-	@NotBlank(message = "Poslali ste samo razmake")
-	@Pattern(regexp = "^(?! ).*$", message = "Unijeli ste prvo razmak pa username")
-	@Pattern(regexp = "^[^@]*$", message = "Username ne smije sadržavati znak '@'")
-	private String username;
+  @NotNull(message = "Morate unijeti username")
+  @NotBlank(message = "Poslali ste samo razmake")
+  @Pattern(regexp = "^(?! ).*$", message = "Unijeli ste prvo razmak pa username")
+  @Pattern(regexp = "^[^@]*$", message = "Username ne smije sadržavati znak '@'")
+  private String username;
 }

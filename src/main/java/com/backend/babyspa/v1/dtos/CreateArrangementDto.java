@@ -13,19 +13,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreateArrangementDto {
 
-    @Min(value = 1, message = "Morate izabrati validan popust")
-    private Integer discountId;
+  @Min(value = 1, message = "Morate izabrati validan popust")
+  private Integer discountId;
 
-    private String note;
+  private String note;
 
-    @NotNull(message = "Morate bebu za koju pravi aranzman")
-    @Min(value = 1, message = "Morate izabrati validnu bebu")
-    private int babyId;
+  @NotNull(message = "Morate bebu za koju pravi aranzman")
+  @Min(value = 1, message = "Morate izabrati validnu bebu")
+  private int babyId;
 
-    @NotNull(message = "Morate izabrati paket usluge")
-    @Min(value = 1, message = "Morate izabrati validan paket usluge")
-    private Integer servicePackageId;
+  @NotNull(message = "Morate izabrati paket usluge")
+  @Min(value = 1, message = "Morate izabrati validan paket usluge")
+  private Integer servicePackageId;
 
-    @Min(value = 1, message = "Morate izabrati validnu poklon karticu")
-    private Integer giftCardId;
+  @Min(value = 1, message = "Morate izabrati validnu poklon karticu")
+  private Integer giftCardId;
 }

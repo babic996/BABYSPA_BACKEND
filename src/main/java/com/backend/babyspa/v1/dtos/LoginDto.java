@@ -15,14 +15,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginDto {
 
-	@NotNull(message = "Morate unijeti username")
-	@NotBlank(message = "Poslali ste samo razmake")
-	@Pattern(regexp = "^(?! ).*$", message = "Unijeli ste prvo razmak pa username")
-	private String username;
+  @NotNull(message = "Morate unijeti username")
+  @NotBlank(message = "Poslali ste samo razmake")
+  @Pattern(regexp = "^(?! ).*$", message = "Unijeli ste prvo razmak pa username")
+  private String username;
 
-	@NotNull(message = "Morate unijeti password")
-	@NotBlank(message = "Poslali ste samo razmake")
-	@Pattern(regexp = "^(?! ).*", message = "Unijeli ste prvo razmak pa password")
-	@Size(min = 8, message = "Password mora imati najmanje 8 karaktera")
-	private String password;
+  @NotNull(message = "Morate unijeti password")
+  @NotBlank(message = "Poslali ste samo razmake")
+  @Pattern(regexp = "^(?! ).*", message = "Unijeli ste prvo razmak pa password")
+  @Size(min = 8, message = "Password mora imati najmanje 8 karaktera")
+  private String password;
 }

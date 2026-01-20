@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ServicePackageDailyReportFindAllDto {
 
-	private int servicePackageDailyReportId;
-	private int numberOfUsedPackages;
-	private String date;
+  private int servicePackageDailyReportId;
+  private int numberOfUsedPackages;
+  private String date;
 }

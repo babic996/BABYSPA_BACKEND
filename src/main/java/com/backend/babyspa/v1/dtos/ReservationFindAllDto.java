@@ -15,11 +15,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReservationFindAllDto {
 
-	private int reservationId;
-	private LocalDateTime createdAt;
-	private LocalDateTime startDate;
-	private LocalDateTime endDate;
-	private String note;
-	private Status status;
-	private FindAllArrangementDto arrangement;
+  private int reservationId;
+  private LocalDateTime createdAt;
+  private LocalDateTime startDate;
+  private LocalDateTime endDate;
+  private String note;
+  private Status status;
+  private FindAllArrangementDto arrangement;
 }

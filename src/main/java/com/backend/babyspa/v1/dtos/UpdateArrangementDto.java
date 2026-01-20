@@ -14,25 +14,25 @@ import lombok.ToString;
 @ToString
 public class UpdateArrangementDto {
 
-    @NotNull(message = "Morate poslati id aranzmana")
-    private int arrangementId;
+  @NotNull(message = "Morate poslati id aranzmana")
+  private int arrangementId;
 
-    private Integer discountId;
+  private Integer discountId;
 
-    private Integer giftCardId;
+  private Integer giftCardId;
 
-    private String note;
+  private String note;
 
-    private Integer extendDurationDays;
+  private Integer extendDurationDays;
 
-    @NotNull(message = "Morate bebu za koju pravi aranzman")
-    private int babyId;
+  @NotNull(message = "Morate bebu za koju pravi aranzman")
+  private int babyId;
 
-    @NotNull(message = "Morate izabrati status aranzmana")
-    private int statusId;
+  @NotNull(message = "Morate izabrati status aranzmana")
+  private int statusId;
 
-    @NotNull(message = "Morate izabrati paket usluge")
-    private int servicePackageId;
+  @NotNull(message = "Morate izabrati paket usluge")
+  private int servicePackageId;
 
-    private Integer paymentTypeId;
+  private Integer paymentTypeId;
 }

@@ -13,6 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AssignRolesDto {
 
-	private int userId;
-	private List<Integer> roleIds;
+  private int userId;
+  private List<Integer> roleIds;
 }

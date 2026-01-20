@@ -15,15 +15,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreateReservationDto {
 
-	@NotNull(message = "Morate odabrati datum rezervacije")
-	private LocalDateTime startDate;
+  @NotNull(message = "Morate odabrati datum rezervacije")
+  private LocalDateTime startDate;
 
-	@NotNull(message = "Morate poslati id aranzmana")
-	private Integer arrangementId;
+  @NotNull(message = "Morate poslati id aranzmana")
+  private Integer arrangementId;
 
-	@NotNull(message = "Morate odabrati koliko minuta traje rezervacije")
-	@Min(value = 1, message = "Rezervacija mora trajati najmanje jednu minutu")
-	private Integer durationReservation;
+  @NotNull(message = "Morate odabrati koliko minuta traje rezervacije")
+  @Min(value = 1, message = "Rezervacija mora trajati najmanje jednu minutu")
+  private Integer durationReservation;
 
-	private String note;
+  private String note;
 }

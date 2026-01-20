@@ -12,11 +12,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateReservationDto {
 
-	@NotNull(message = "Morate poslati id rezervacije")
-	private Integer reservationId;
+  @NotNull(message = "Morate poslati id rezervacije")
+  private Integer reservationId;
 
-	@NotNull(message = "Morate odabrati status")
-	private Integer statusId;
+  @NotNull(message = "Morate odabrati status")
+  private Integer statusId;
 
-	private String note;
+  private String note;
 }

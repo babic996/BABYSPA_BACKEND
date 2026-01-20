@@ -18,25 +18,25 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateServicePackageDto {
 
-	@NotNull(message = "Morate poslati id paketa usluge")
-	private int servicePackageId;
+  @NotNull(message = "Morate poslati id paketa usluge")
+  private int servicePackageId;
 
-	@NotNull(message = "Morate unijeti ime bebe")
-	@NotBlank(message = "Poslali ste samo razmake")
-	@Pattern(regexp = "^(?! ).*", message = "Unijeli ste prvo razmak pa naziv")
-	private String servicePackageName;
+  @NotNull(message = "Morate unijeti ime bebe")
+  @NotBlank(message = "Poslali ste samo razmake")
+  @Pattern(regexp = "^(?! ).*", message = "Unijeli ste prvo razmak pa naziv")
+  private String servicePackageName;
 
-	@NotNull(message = "Morate unijeti broj termina")
-	@Min(value = 1, message = "Broj termina mora biti veći od 0")
-	private int termNumber;
+  @NotNull(message = "Morate unijeti broj termina")
+  @Min(value = 1, message = "Broj termina mora biti veći od 0")
+  private int termNumber;
 
-	@NotNull(message = "Morate unijeti koliko dana traje termin")
-	@Min(value = 1, message = "Broj trajanja u danima mora biti veći od 0")
-	private int servicePackageDurationDays;
+  @NotNull(message = "Morate unijeti koliko dana traje termin")
+  @Min(value = 1, message = "Broj trajanja u danima mora biti veći od 0")
+  private int servicePackageDurationDays;
 
-	@NotNull(message = "Morate unijeti cijenu paketa")
-	@DecimalMin(value = "0.1", message = "Cijena mora biti veća od 0")
-	private BigDecimal price;
+  @NotNull(message = "Morate unijeti cijenu paketa")
+  @DecimalMin(value = "0.1", message = "Cijena mora biti veća od 0")
+  private BigDecimal price;
 
-	private String note;
+  private String note;
 }
