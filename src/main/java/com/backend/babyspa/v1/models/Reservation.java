@@ -26,46 +26,46 @@ import lombok.Setter;
 @Table(name = "reservation")
 public class Reservation extends TenantEntity {
 
-    @Id
-    @Column(name = "reservation_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int reservationId;
+  @Id
+  @Column(name = "reservation_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int reservationId;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+  @Column(name = "start_date", nullable = false)
+  private LocalDateTime startDate;
 
-    @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+  @Column(name = "end_date", nullable = false)
+  private LocalDateTime endDate;
 
-    @Column(name = "note", columnDefinition = "TEXT")
-    private String note;
+  @Column(name = "note", columnDefinition = "TEXT")
+  private String note;
 
-    @Column(name = "is_deleted")
-    private boolean isDeleted = false;
+  @Column(name = "is_deleted")
+  private boolean isDeleted = false;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+  @Column(name = "deleted_at")
+  private LocalDateTime deletedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "arrangement_id", nullable = false)
-    private Arrangement arrangement;
+  @ManyToOne
+  @JoinColumn(name = "arrangement_id", nullable = false)
+  private Arrangement arrangement;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
-    private Status status;
+  @ManyToOne
+  @JoinColumn(name = "status_id", nullable = false)
+  private Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by_user_id", referencedColumnName = "user_id", nullable = false)
-    private User createdByUser;
+  @ManyToOne
+  @JoinColumn(name = "created_by_user_id", referencedColumnName = "user_id", nullable = false)
+  private User createdByUser;
 
-    @ManyToOne
-    @JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id")
-    private User updatedByUser;
+  @ManyToOne
+  @JoinColumn(name = "updated_by_user_id", referencedColumnName = "user_id")
+  private User updatedByUser;
 
-    @ManyToOne
-    @JoinColumn(name = "deleted_by_user_id", referencedColumnName = "user_id")
-    private User deletedByUser;
+  @ManyToOne
+  @JoinColumn(name = "deleted_by_user_id", referencedColumnName = "user_id")
+  private User deletedByUser;
 }

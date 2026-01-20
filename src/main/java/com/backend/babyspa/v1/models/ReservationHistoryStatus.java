@@ -18,26 +18,26 @@ import java.time.LocalDateTime;
 @Table(name = "reservation_history_status")
 public class ReservationHistoryStatus extends TenantEntity {
 
-    @Id
-    @Column(name = "reservation_history_status_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int reservationHistoryStatusId;
+  @Id
+  @Column(name = "reservation_history_status_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int reservationHistoryStatusId;
 
-    @ManyToOne
-    @JoinColumn(name = "reservation_id", nullable = false)
-    private Reservation reservation;
+  @ManyToOne
+  @JoinColumn(name = "reservation_id", nullable = false)
+  private Reservation reservation;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
-    private Status status;
+  @ManyToOne
+  @JoinColumn(name = "status_id", nullable = false)
+  private Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "action_by_user_id", referencedColumnName = "user_id", nullable = false)
-    private User actionByUser;
+  @ManyToOne
+  @JoinColumn(name = "action_by_user_id", referencedColumnName = "user_id", nullable = false)
+  private User actionByUser;
 
-    @JoinColumn(name = "action_at", nullable = false)
-    private LocalDateTime actionAt = LocalDateTime.now();
+  @JoinColumn(name = "action_at", nullable = false)
+  private LocalDateTime actionAt = LocalDateTime.now();
 
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
 }

@@ -16,13 +16,11 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 @RequestMapping("/payment-type")
 public class PaymentTypeController {
 
-    @Autowired
-    PaymentTypeService paymentTypeService;
+  @Autowired private PaymentTypeService paymentTypeService;
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<List<PaymentType>>> findAll() {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<List<PaymentType>>> findAll() {
 
-        return ResponseEntity.ok(ApiResponse.success(paymentTypeService.findAll()));
-    }
-
+    return ResponseEntity.ok(ApiResponse.success(paymentTypeService.findAll()));
+  }
 }

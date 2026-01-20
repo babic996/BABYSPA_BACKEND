@@ -6,6 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 public interface LocalDateProjection {
 
-	@Value("#{target.date}")
-	LocalDate getDate();
+  @Value("#{target.date}")
+  LocalDate getDate();
 }

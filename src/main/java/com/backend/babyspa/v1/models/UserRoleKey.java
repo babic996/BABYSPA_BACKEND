@@ -16,10 +16,9 @@ import lombok.Setter;
 @Embeddable
 public class UserRoleKey implements Serializable {
 
-	@Column(name = "user_id", nullable = false)
-	private int userId;
+  @Column(name = "user_id", nullable = false)
+  private int userId;
 
-	@Column(name = "role_id", nullable = false)
-	private int roleId;
-
+  @Column(name = "role_id", nullable = false)
+  private int roleId;
 }

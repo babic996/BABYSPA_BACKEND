@@ -12,73 +12,76 @@ import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Status;
 import com.backend.babyspa.v1.models.StatusType;
 import com.backend.babyspa.v1.repositories.StatusRepository;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StatusService {
 
-    @Autowired
-    StatusRepository statusRepository;
+  @Autowired private StatusRepository statusRepository;
 
-    @Autowired
-    StatusTypeService statusTypeService;
+  @Autowired private StatusTypeService statusTypeService;
 
-    public Status findById(int statusId) {
-        return statusRepository.findById(statusId)
-                .orElseThrow(() -> new NotFoundException("Nije pronađen status sa id: " + statusId + "!"));
+  public Status findById(int statusId) {
+    return statusRepository
+        .findById(statusId)
+        .orElseThrow(() -> new NotFoundException("Nije pronađen status sa id: " + statusId + "!"));
+  }
+
+  public Status findByStatusCode(String statusCode) {
+    return statusRepository
+        .findByStatusCode(statusCode)
+        .orElseThrow(
+            () -> new NotFoundException("Nije pronađen status sa kodom: " + statusCode + "!"));
+  }
+
+  public Status save(CreateStatusDto createStatusDto) {
+    StatusType statusType = statusTypeService.findById(createStatusDto.getStatusTypeId());
+
+    if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(
+        createStatusDto.getStatusName(), createStatusDto.getStatusCode(), statusType)) {
+      throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
     }
+    Status status = new Status();
 
-    public Status findByStatusCode(String statusCode) {
-        return statusRepository.findByStatusCode(statusCode)
-                .orElseThrow(() -> new NotFoundException("Nije pronađen status sa kodom: " + statusCode + "!"));
+    status.setStatusCode(createStatusDto.getStatusCode());
+    status.setStatusName(createStatusDto.getStatusName());
+    status.setStatusType(statusType);
+
+    return statusRepository.save(status);
+  }
+
+  public Status update(UpdateStatusDto updateStatusDto) {
+    StatusType statusType = statusTypeService.findById(updateStatusDto.getStatusTypeId());
+
+    if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(
+        updateStatusDto.getStatusName(),
+        updateStatusDto.getStatusCode(),
+        statusType,
+        updateStatusDto.getStatusId())) {
+      throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
     }
+    Status status = findById(updateStatusDto.getStatusId());
 
-    public Status save(CreateStatusDto createStatusDto) {
-        StatusType statusType = statusTypeService.findById(createStatusDto.getStatusTypeId());
+    status.setStatusCode(updateStatusDto.getStatusCode());
+    status.setStatusName(updateStatusDto.getStatusName());
+    status.setStatusType(statusType);
 
-        if (statusRepository.existsByStatusNameAndStatusCodeAndStatusType(createStatusDto.getStatusName(),
-                createStatusDto.getStatusCode(), statusType)) {
-            throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
-        }
-        Status status = new Status();
+    return statusRepository.save(status);
+  }
 
-        status.setStatusCode(createStatusDto.getStatusCode());
-        status.setStatusName(createStatusDto.getStatusName());
-        status.setStatusType(statusType);
+  @Transactional
+  public int delete(int statusId) {
+    Status status = findById(statusId);
 
-        return statusRepository.save(status);
-    }
+    statusRepository.delete(status);
+    return statusId;
+  }
 
-    public Status update(UpdateStatusDto updateStatusDto) {
-        StatusType statusType = statusTypeService.findById(updateStatusDto.getStatusTypeId());
+  public List<Status> findAll() {
+    return statusRepository.findAll();
+  }
 
-        if (statusRepository.existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(updateStatusDto.getStatusName(),
-                updateStatusDto.getStatusCode(), statusType, updateStatusDto.getStatusId())) {
-            throw new BusinessException("Postoji status sa ovom kombinacijom imena i koda!");
-        }
-        Status status = findById(updateStatusDto.getStatusId());
-
-        status.setStatusCode(updateStatusDto.getStatusCode());
-        status.setStatusName(updateStatusDto.getStatusName());
-        status.setStatusType(statusType);
-
-        return statusRepository.save(status);
-    }
-
-    @Transactional
-    public int delete(int statusId) {
-        Status status = findById(statusId);
-
-        statusRepository.delete(status);
-        return statusId;
-    }
-
-    public List<Status> findAll() {
-        return statusRepository.findAll();
-    }
-
-    public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
-        return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
-    }
+  public List<Status> findAllByStatusTypeCode(String statusTypeCode) {
+    return statusRepository.findByStatusType_StatusTypeCode(statusTypeCode);
+  }
 }

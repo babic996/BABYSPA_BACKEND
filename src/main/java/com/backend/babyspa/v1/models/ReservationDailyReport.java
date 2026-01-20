@@ -26,23 +26,22 @@ import lombok.Setter;
 @Table(name = "reservation_daily_report")
 public class ReservationDailyReport extends TenantEntity {
 
-	@Id
-	@Column(name = "reservation_daily_report_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int reservationDailyReportId;
+  @Id
+  @Column(name = "reservation_daily_report_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int reservationDailyReportId;
 
-	@Column(name = "number_of_reservation", nullable = false)
-	private int numberOfReservation;
+  @Column(name = "number_of_reservation", nullable = false)
+  private int numberOfReservation;
 
-	@Column(name = "date", nullable = false)
-	private LocalDate date;
+  @Column(name = "date", nullable = false)
+  private LocalDate date;
 
-	@ManyToOne
-	@JoinColumn(name = "baby_id", nullable = false)
-	private Baby baby;
+  @ManyToOne
+  @JoinColumn(name = "baby_id", nullable = false)
+  private Baby baby;
 
-	@ManyToOne
-	@JoinColumn(name = "status_id", nullable = true)
-	private Status status;
-
+  @ManyToOne
+  @JoinColumn(name = "status_id", nullable = true)
+  private Status status;
 }

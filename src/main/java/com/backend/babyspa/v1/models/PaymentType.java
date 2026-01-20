@@ -22,30 +22,28 @@ import lombok.Setter;
 @Table(name = "payment_type")
 public class PaymentType extends TenantEntity {
 
-    @Id
-    @Column(name = "payment_type_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int paymentTypeId;
+  @Id
+  @Column(name = "payment_type_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int paymentTypeId;
 
-    @Column(name = "payment_type_name", nullable = false)
-    private String paymentTypeName;
+  @Column(name = "payment_type_name", nullable = false)
+  private String paymentTypeName;
 
-    @Column(name = "payment_type_code", nullable = false)
-    private String paymentTypeCode;
+  @Column(name = "payment_type_code", nullable = false)
+  private String paymentTypeCode;
 
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
 
-    public PaymentType(String paymentTypeName, String paymentTypeCode, String tenantId) {
-        this.paymentTypeName = paymentTypeName;
-        this.paymentTypeCode = paymentTypeCode;
-        this.tenantId = tenantId;
-    }
+  public PaymentType(String paymentTypeName, String paymentTypeCode, String tenantId) {
+    this.paymentTypeName = paymentTypeName;
+    this.paymentTypeCode = paymentTypeCode;
+    this.tenantId = tenantId;
+  }
 
-    @Override
-    public String toString() {
-        return "Id: " + paymentTypeId +
-                ", Ime: " + paymentTypeName +
-                ", Kod: " + paymentTypeCode;
-    }
+  @Override
+  public String toString() {
+    return "Id: " + paymentTypeId + ", Ime: " + paymentTypeName + ", Kod: " + paymentTypeCode;
+  }
 }

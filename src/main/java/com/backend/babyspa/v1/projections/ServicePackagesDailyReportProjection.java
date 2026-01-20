@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 public interface ServicePackagesDailyReportProjection {
 
-	@Value("#{target.number_of_used_packages}")
-	Integer getNumberOfUsedPackages();
+  @Value("#{target.number_of_used_packages}")
+  Integer getNumberOfUsedPackages();
 
-	@Value("#{target.date}")
-	String getDate();
+  @Value("#{target.date}")
+  String getDate();
 }

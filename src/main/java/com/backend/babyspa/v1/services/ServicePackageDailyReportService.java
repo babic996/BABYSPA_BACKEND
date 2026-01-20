@@ -15,78 +15,89 @@ import com.backend.babyspa.v1.models.ServicePackageDailyReport;
 import com.backend.babyspa.v1.projections.ServicePackagesDailyReportProjection;
 import com.backend.babyspa.v1.repositories.ServicePackageDailyReportRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ServicePackageDailyReportService {
 
-    @Autowired
-    ServicePackageDailyReportRepository servicePackageDailyReportRepository;
+  @Autowired private ServicePackageDailyReportRepository servicePackageDailyReportRepository;
 
-    @Transactional
-    public ServicePackageDailyReport save(ServicePackageDailyReportDto servicePackageDailyReportDto, String tenantId) {
-        ServicePackageDailyReport servicePackageDailyReport = new ServicePackageDailyReport();
+  @Transactional
+  public ServicePackageDailyReport save(
+      ServicePackageDailyReportDto servicePackageDailyReportDto, String tenantId) {
+    ServicePackageDailyReport servicePackageDailyReport = new ServicePackageDailyReport();
 
-        if (Objects.nonNull(servicePackageDailyReportDto.getServicePackage())) {
-            servicePackageDailyReport.setServicePackage(servicePackageDailyReportDto.getServicePackage());
-        }
-        servicePackageDailyReport.setNumberOfUsedPackages(servicePackageDailyReportDto.getNumberOfUsedPackages());
-        servicePackageDailyReport.setDate(servicePackageDailyReportDto.getDate());
-        servicePackageDailyReport.setTenantId(tenantId);
+    if (Objects.nonNull(servicePackageDailyReportDto.getServicePackage())) {
+      servicePackageDailyReport.setServicePackage(servicePackageDailyReportDto.getServicePackage());
+    }
+    servicePackageDailyReport.setNumberOfUsedPackages(
+        servicePackageDailyReportDto.getNumberOfUsedPackages());
+    servicePackageDailyReport.setDate(servicePackageDailyReportDto.getDate());
+    servicePackageDailyReport.setTenantId(tenantId);
 
-        return servicePackageDailyReportRepository.save(servicePackageDailyReport);
+    return servicePackageDailyReportRepository.save(servicePackageDailyReport);
+  }
+
+  public List<ServicePackagesDailyReportProjection> findAll(
+      Integer servicePackageId,
+      LocalDateTime startRangeDate,
+      LocalDateTime endRangeDate,
+      String groupDataType) {
+    if (Objects.isNull(startRangeDate) && Objects.nonNull(endRangeDate)) {
+      startRangeDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
+    } else if (Objects.nonNull(startRangeDate) && Objects.isNull(endRangeDate)) {
+      endRangeDate = LocalDateTime.now().plusMinutes(15);
     }
 
-    public List<ServicePackagesDailyReportProjection> findAll(Integer servicePackageId, LocalDateTime startRangeDate,
-                                                              LocalDateTime endRangeDate, String groupDataType) {
-        if (Objects.isNull(startRangeDate) && Objects.nonNull(endRangeDate)) {
-            startRangeDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
-        } else if (Objects.nonNull(startRangeDate) && Objects.isNull(endRangeDate)) {
-            endRangeDate = LocalDateTime.now().plusMinutes(15);
-        }
+    if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
+      if (groupDataType.equals(ReportSortEnum.day.name())) {
+        return servicePackageDailyReportRepository.findAllByServicePackageId(
+            servicePackageId, TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.month.name())) {
+        return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByMonth(
+            servicePackageId, TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.year.name())) {
+        return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByYear(
+            servicePackageId, TenantContext.getTenant());
+      }
 
-        if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
-            if (groupDataType.equals(ReportSortEnum.day.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageId(servicePackageId,
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.month.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByMonth(servicePackageId,
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.year.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageIdGroupByYear(servicePackageId,
-                        TenantContext.getTenant());
-            }
-
-        } else {
-            if (groupDataType.equals(ReportSortEnum.day.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDate(
-                        servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.month.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDateGroupByMonth(
-                        servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.year.name())) {
-                return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDateGroupByYear(
-                        servicePackageId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
-                        TenantContext.getTenant());
-            }
-        }
-        return null;
+    } else {
+      if (groupDataType.equals(ReportSortEnum.day.name())) {
+        return servicePackageDailyReportRepository.findAllByServicePackageIdAndStartDateAndEndDate(
+            servicePackageId,
+            startRangeDate.toLocalDate(),
+            endRangeDate.toLocalDate(),
+            TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.month.name())) {
+        return servicePackageDailyReportRepository
+            .findAllByServicePackageIdAndStartDateAndEndDateGroupByMonth(
+                servicePackageId,
+                startRangeDate.toLocalDate(),
+                endRangeDate.toLocalDate(),
+                TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.year.name())) {
+        return servicePackageDailyReportRepository
+            .findAllByServicePackageIdAndStartDateAndEndDateGroupByYear(
+                servicePackageId,
+                startRangeDate.toLocalDate(),
+                endRangeDate.toLocalDate(),
+                TenantContext.getTenant());
+      }
     }
+    return null;
+  }
 
-    public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
-        return servicePackageDailyReportRepository.existsByDate(date);
-    }
+  public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
+    return servicePackageDailyReportRepository.existsByDate(date);
+  }
 
-    @Transactional
-    public void deleteAllByTenantId(String tenantId) {
-        servicePackageDailyReportRepository.deleteAll();
-    }
+  @Transactional
+  public void deleteAllByTenantId(String tenantId) {
+    servicePackageDailyReportRepository.deleteAll();
+  }
 
-    @Transactional
-    public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
-        servicePackageDailyReportRepository.deleteByDate(date);
-    }
+  @Transactional
+  public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
+    servicePackageDailyReportRepository.deleteByDate(date);
+  }
 }

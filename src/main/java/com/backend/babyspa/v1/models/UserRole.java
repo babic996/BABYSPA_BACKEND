@@ -20,17 +20,17 @@ import lombok.Setter;
 @Table(name = "user_role")
 public class UserRole {
 
-	@EmbeddedId
-	@Column(name = "user_role_key_id")
-	private UserRoleKey userRoleKey;
+  @EmbeddedId
+  @Column(name = "user_role_key_id")
+  private UserRoleKey userRoleKey;
 
-	@ManyToOne
-	@MapsId("userId")
-	@JoinColumn(name = "user_id")
-	private User user;
+  @ManyToOne
+  @MapsId("userId")
+  @JoinColumn(name = "user_id")
+  private User user;
 
-	@ManyToOne
-	@MapsId("roleId")
-	@JoinColumn(name = "role_id")
-	private Role role;
+  @ManyToOne
+  @MapsId("roleId")
+  @JoinColumn(name = "role_id")
+  private Role role;
 }

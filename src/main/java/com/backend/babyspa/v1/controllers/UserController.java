@@ -32,71 +32,73 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+  @Autowired private UserService userService;
 
-    @Autowired
-    UserRoleService userRoleService;
+  @Autowired private UserRoleService userRoleService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<User>> findById(@RequestParam int userId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<User>> findById(@RequestParam int userId) {
 
-        return ResponseEntity.ok(ApiResponse.success(userService.findById(userId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(userService.findById(userId)));
+  }
 
-    @GetMapping("/find-user-info-by-id")
-    public ResponseEntity<ApiResponse<UserInfoDto>> findUserInfoByUserId(@RequestParam int userId) {
+  @GetMapping("/find-user-info-by-id")
+  public ResponseEntity<ApiResponse<UserInfoDto>> findUserInfoByUserId(@RequestParam int userId) {
 
-        return ResponseEntity.ok(ApiResponse.success(userService.findUserInfoByUserId(userId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(userService.findUserInfoByUserId(userId)));
+  }
 
-    @GetMapping("/find-all-user-info")
-    public ResponseEntity<ApiResponse<List<UserInfoDto>>> findUserInfoByUserId(@RequestParam(required = false) List<String> excludedRoleNames) {
+  @GetMapping("/find-all-user-info")
+  public ResponseEntity<ApiResponse<List<UserInfoDto>>> findUserInfoByUserId(
+      @RequestParam(required = false) List<String> excludedRoleNames) {
 
-        return ResponseEntity.ok(ApiResponse.success(userService.findAllUsers(excludedRoleNames)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(userService.findAllUsers(excludedRoleNames)));
+  }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<User>> register(@RequestBody @Valid RegisterNewUserDto registerNewUserDto,
-                                                      Authentication authentication) {
+  @PostMapping("/register")
+  public ResponseEntity<ApiResponse<User>> register(
+      @RequestBody @Valid RegisterNewUserDto registerNewUserDto, Authentication authentication) {
 
-    
-        return ResponseEntity.ok(ApiResponse.success(userService.register(registerNewUserDto, authentication)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(userService.register(registerNewUserDto, authentication)));
+  }
 
-    @PostMapping("/add-new-tenant")
-    public ResponseEntity<ApiResponse<User>> addNewTenant(@RequestBody AddNewTenantUserDto addNewTenantUserDto,
-                                                          Authentication authentication) {
+  @PostMapping("/add-new-tenant")
+  public ResponseEntity<ApiResponse<User>> addNewTenant(
+      @RequestBody AddNewTenantUserDto addNewTenantUserDto, Authentication authentication) {
 
-        
-        return ResponseEntity.ok(ApiResponse.success(userService.addNewTenantUser(addNewTenantUserDto, authentication)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(userService.addNewTenantUser(addNewTenantUserDto, authentication)));
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody @Valid LoginDto loginDto) {
+  @PostMapping("/login")
+  public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+      @RequestBody @Valid LoginDto loginDto) {
 
- 
-        return ResponseEntity.ok(ApiResponse.success(userService.loginUser(loginDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(userService.loginUser(loginDto)));
+  }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody ChangePasswordDto changePasswordDto,
-                                                              Authentication authentication) {
+  @PutMapping("/change-password")
+  public ResponseEntity<ApiResponse<String>> changePassword(
+      @RequestBody ChangePasswordDto changePasswordDto, Authentication authentication) {
 
-        return ResponseEntity.ok(ApiResponse.success(userService.changePassword(changePasswordDto, authentication)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(userService.changePassword(changePasswordDto, authentication)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<User>> update(@RequestBody @Valid UpdateUserDto updateUserDto,
-                                                    Authentication authentication) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<User>> update(
+      @RequestBody @Valid UpdateUserDto updateUserDto, Authentication authentication) {
 
-        return ResponseEntity.ok(ApiResponse.success(userService.updateUser(updateUserDto, authentication)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(userService.updateUser(updateUserDto, authentication)));
+  }
 
-    @PutMapping("/assign-roles")
-    public ResponseEntity<ApiResponse<String>> assignRoles(@RequestBody AssignRolesDto assignRolesDto,
-                                                           Authentication authentication) {
+  @PutMapping("/assign-roles")
+  public ResponseEntity<ApiResponse<String>> assignRoles(
+      @RequestBody AssignRolesDto assignRolesDto, Authentication authentication) {
 
-        return ResponseEntity.ok(ApiResponse.success(userRoleService.assignRolesToUser(assignRolesDto, authentication)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(userRoleService.assignRolesToUser(assignRolesDto, authentication)));
+  }
 }

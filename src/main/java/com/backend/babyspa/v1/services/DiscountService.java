@@ -11,68 +11,70 @@ import com.backend.babyspa.v1.dtos.UpdateDiscountDto;
 import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.models.Discount;
 import com.backend.babyspa.v1.repositories.DiscountRepository;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DiscountService {
 
-    @Autowired
-    DiscountRepository discountRepository;
+  @Autowired private DiscountRepository discountRepository;
 
-    public Discount findById(Integer discountId) {
+  public Discount findById(Integer discountId) {
 
-        return discountRepository.findById(discountId)
-                .orElseThrow(() -> new NotFoundException("Nije pronađen popust sa ID: " + discountId + "!"));
+    return discountRepository
+        .findById(discountId)
+        .orElseThrow(
+            () -> new NotFoundException("Nije pronađen popust sa ID: " + discountId + "!"));
+  }
+
+  public Discount save(CreateDiscountDto createDiscountDto) {
+    if (discountRepository.existsByValueAndIsPrecentage(
+        createDiscountDto.getValue(), createDiscountDto.getIsPrecentage())) {
+      throw new BusinessException("Postoji popust sa unijetim parametrima!");
+    }
+    Discount discount = new Discount();
+
+    if (createDiscountDto.getIsPrecentage()) {
+      discount.setDiscountName(createDiscountDto.getValue().toString() + "%");
+    } else {
+      discount.setDiscountName(createDiscountDto.getValue().toString() + "KM");
     }
 
-    public Discount save(CreateDiscountDto createDiscountDto) {
-        if (discountRepository.existsByValueAndIsPrecentage(createDiscountDto.getValue(),
-                createDiscountDto.getIsPrecentage())) {
-            throw new BusinessException("Postoji popust sa unijetim parametrima!");
-        }
-        Discount discount = new Discount();
+    discount.setPrecentage(createDiscountDto.getIsPrecentage());
+    discount.setValue(createDiscountDto.getValue());
 
-        if (createDiscountDto.getIsPrecentage()) {
-            discount.setDiscountName(createDiscountDto.getValue().toString() + "%");
-        } else {
-            discount.setDiscountName(createDiscountDto.getValue().toString() + "KM");
-        }
+    return discountRepository.save(discount);
+  }
 
-        discount.setPrecentage(createDiscountDto.getIsPrecentage());
-        discount.setValue(createDiscountDto.getValue());
+  public Discount update(UpdateDiscountDto updateDiscountDto) {
+    if (discountRepository.existsByValueAndIsPrecentageAndDiscountIdNot(
+        updateDiscountDto.getValue(),
+        updateDiscountDto.getIsPrecentage(),
+        updateDiscountDto.getDisountId())) {
+      throw new BusinessException("Postoji popust sa unijetim parametrima!");
+    }
+    Discount discount = findById(updateDiscountDto.getDisountId());
 
-        return discountRepository.save(discount);
+    if (updateDiscountDto.getIsPrecentage()) {
+      discount.setDiscountName(updateDiscountDto.getValue().toString() + "%");
+    } else {
+      discount.setDiscountName(updateDiscountDto.getValue().toString() + "KM");
     }
 
-    public Discount update(UpdateDiscountDto updateDiscountDto) {
-        if (discountRepository.existsByValueAndIsPrecentageAndDiscountIdNot(updateDiscountDto.getValue(),
-                updateDiscountDto.getIsPrecentage(), updateDiscountDto.getDisountId())) {
-            throw new BusinessException("Postoji popust sa unijetim parametrima!");
-        }
-        Discount discount = findById(updateDiscountDto.getDisountId());
+    discount.setPrecentage(updateDiscountDto.getIsPrecentage());
+    discount.setValue(updateDiscountDto.getValue());
 
-        if (updateDiscountDto.getIsPrecentage()) {
-            discount.setDiscountName(updateDiscountDto.getValue().toString() + "%");
-        } else {
-            discount.setDiscountName(updateDiscountDto.getValue().toString() + "KM");
-        }
+    return discountRepository.save(discount);
+  }
 
-        discount.setPrecentage(updateDiscountDto.getIsPrecentage());
-        discount.setValue(updateDiscountDto.getValue());
+  @Transactional
+  public int delete(int discountId) {
+    Discount discount = findById(discountId);
 
-        return discountRepository.save(discount);
-    }
+    discountRepository.delete(discount);
+    return discountId;
+  }
 
-    @Transactional
-    public int delete(int discountId) {
-        Discount discount = findById(discountId);
-
-        discountRepository.delete(discount);
-        return discountId;
-    }
-
-    public List<Discount> findAll() {
-        return discountRepository.findAll();
-    }
+  public List<Discount> findAll() {
+    return discountRepository.findAll();
+  }
 }

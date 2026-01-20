@@ -19,18 +19,21 @@ import com.backend.babyspa.v1.utils.ApiResponse;
 @RequestMapping("/reservation-daily-report")
 public class ReservationDailyReportController {
 
-    @Autowired
-    ReservationDailyReportService reservationDailyReportService;
+  @Autowired private ReservationDailyReportService reservationDailyReportService;
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<List<ReservationDailyReportProjection>>> findAll(
-            @RequestParam(required = false) Integer statusId, @RequestParam(required = false) Integer babyId,
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate,
-            @RequestParam String groupDataType) {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<List<ReservationDailyReportProjection>>> findAll(
+      @RequestParam(required = false) Integer statusId,
+      @RequestParam(required = false) Integer babyId,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate,
+      @RequestParam String groupDataType) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationDailyReportService.findAll(statusId, babyId, startRangeDate,
-                endRangeDate, groupDataType)));
-    }
-
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            reservationDailyReportService.findAll(
+                statusId, babyId, startRangeDate, endRangeDate, groupDataType)));
+  }
 }

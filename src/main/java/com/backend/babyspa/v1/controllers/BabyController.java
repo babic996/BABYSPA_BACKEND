@@ -29,47 +29,50 @@ import jakarta.validation.Valid;
 @RequestMapping("/baby")
 public class BabyController {
 
-    @Autowired
-    BabyService babyService;
+  @Autowired private BabyService babyService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<Baby>> findById(@RequestParam Integer babyId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<Baby>> findById(@RequestParam Integer babyId) {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.findById(babyId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(babyService.findById(babyId)));
+  }
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Baby>> save(@RequestBody @Valid CreateBabyDto createBabyDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<Baby>> save(@RequestBody @Valid CreateBabyDto createBabyDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.save(createBabyDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(babyService.save(createBabyDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<Baby>> update(@RequestBody @Valid UpdateBabyDto updateBabyDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<Baby>> update(@RequestBody @Valid UpdateBabyDto updateBabyDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.update(updateBabyDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(babyService.update(updateBabyDto)));
+  }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int babyId) {
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int babyId) {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.delete(babyId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(babyService.delete(babyId)));
+  }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<Baby>>> findAllByParametars(
-            @RequestParam(required = false) String searchText, @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<Page<Baby>>> findAllPage(
+      @RequestParam(required = false) String searchText,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate) {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.findAllByQueryParametars(searchText, startRangeDate, endRangeDate, page, size)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            babyService.findAllPage(searchText, startRangeDate, endRangeDate, page, size)));
+  }
 
-    @GetMapping("/find-all-list")
-    public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
+  @GetMapping("/find-all-list")
+  public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        return ResponseEntity.ok(ApiResponse.success(babyService.findAllList()));
-    }
-
+    return ResponseEntity.ok(ApiResponse.success(babyService.findAllList()));
+  }
 }

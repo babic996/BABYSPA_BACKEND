@@ -19,26 +19,29 @@ import org.hibernate.annotations.Filter;
 @EqualsAndHashCode(of = "serialNumber")
 public class GiftCard extends TenantEntity {
 
-    @Id
-    @Column(name = "gift_card_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int giftCardId;
+  @Id
+  @Column(name = "gift_card_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int giftCardId;
 
-    @Column(name = "serial_number", nullable = false)
-    private String serialNumber;
+  @Column(name = "serial_number", nullable = false)
+  private String serialNumber;
 
-    @Column(name = "expiration_date", nullable = true)
-    private LocalDateTime expirationDate;
+  @Column(name = "expiration_date", nullable = true)
+  private LocalDateTime expirationDate;
 
-    @Column(name = "used", nullable = false)
-    private boolean used = false;
+  @Column(name = "used", nullable = false)
+  private boolean used = false;
 
-    @Override
-    public String toString() {
-        return "Id: " + giftCardId +
-                ", Serijski broj: " + serialNumber +
-                ", Datum isteka: " + (Objects.nonNull(expirationDate) ? DateTimeUtil.formatLocalDateTime(expirationDate) : "") +
-                ", Iskorištena: " + (used ? "DA" : "NE");
-    }
-
+  @Override
+  public String toString() {
+    return "Id: "
+        + giftCardId
+        + ", Serijski broj: "
+        + serialNumber
+        + ", Datum isteka: "
+        + (Objects.nonNull(expirationDate) ? DateTimeUtil.formatLocalDateTime(expirationDate) : "")
+        + ", Iskorištena: "
+        + (used ? "DA" : "NE");
+  }
 }

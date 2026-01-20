@@ -28,53 +28,60 @@ import jakarta.validation.Valid;
 @RequestMapping("/service-package")
 public class ServicePackageController {
 
-    @Autowired
-    ServicePackageService servicePackageService;
+  @Autowired private ServicePackageService servicePackageService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<ServicePackage>> findById(@RequestParam Integer servicePackageId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<ServicePackage>> findById(
+      @RequestParam Integer servicePackageId) {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findById(servicePackageId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(servicePackageService.findById(servicePackageId)));
+  }
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<ServicePackage>> save(
-            @RequestBody @Valid CreateServicePackageDto createServicePackageDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<ServicePackage>> save(
+      @RequestBody @Valid CreateServicePackageDto createServicePackageDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.save(createServicePackageDto)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(servicePackageService.save(createServicePackageDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<ServicePackage>> update(
-            @RequestBody @Valid UpdateServicePackageDto updateServicePackageDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<ServicePackage>> update(
+      @RequestBody @Valid UpdateServicePackageDto updateServicePackageDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.update(updateServicePackageDto)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(servicePackageService.update(updateServicePackageDto)));
+  }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int servicePackageId) {
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int servicePackageId) {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.delete(servicePackageId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(servicePackageService.delete(servicePackageId)));
+  }
 
-    @GetMapping("/find-all-list")
-    public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
+  @GetMapping("/find-all-list")
+  public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findAllList()));
-    }
+    return ResponseEntity.ok(ApiResponse.success(servicePackageService.findAllList()));
+  }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<ServicePackage>>> findAll(@RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String searchText,
-                                                                     @RequestParam(required = false) BigDecimal startPrice,
-                                                                     @RequestParam(required = false) BigDecimal endPrice) {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<Page<ServicePackage>>> findAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) String searchText,
+      @RequestParam(required = false) BigDecimal startPrice,
+      @RequestParam(required = false) BigDecimal endPrice) {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findAll(page, size, searchText, startPrice, endPrice)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            servicePackageService.findAll(page, size, searchText, startPrice, endPrice)));
+  }
 
-    @GetMapping("/find-max-price")
-    public ResponseEntity<ApiResponse<Double>> findMaxPrice() {
+  @GetMapping("/find-max-price")
+  public ResponseEntity<ApiResponse<Double>> findMaxPrice() {
 
-        return ResponseEntity.ok(ApiResponse.success(servicePackageService.findMaxPriceServicePackage()));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(servicePackageService.findMaxPriceServicePackage()));
+  }
 }

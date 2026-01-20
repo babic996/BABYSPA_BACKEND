@@ -9,12 +9,11 @@ import java.util.Objects;
 
 import com.backend.babyspa.v1.exceptions.BusinessException;
 import com.backend.babyspa.v1.models.*;
+import com.backend.babyspa.v1.specifications.ArrangementSpecifications;
 import com.backend.babyspa.v1.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.backend.babyspa.v1.config.TenantContext;
@@ -26,341 +25,363 @@ import com.backend.babyspa.v1.exceptions.NotFoundException;
 import com.backend.babyspa.v1.repositories.ArrangementRepository;
 import com.backend.babyspa.v1.repositories.ReservationRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ArrangementService {
 
-    @Autowired
-    ArrangementRepository arrangementRepository;
+  @Autowired private ArrangementRepository arrangementRepository;
 
-    @Autowired
-    ReservationRepository reservationRepository;
+  @Autowired private ReservationRepository reservationRepository;
 
-    @Autowired
-    ServicePackageService servicePackageService;
+  @Autowired private ServicePackageService servicePackageService;
 
-    @Autowired
-    DiscountService discountService;
+  @Autowired private DiscountService discountService;
 
-    @Autowired
-    BabyService babyService;
+  @Autowired private BabyService babyService;
 
-    @Autowired
-    StatusService statusService;
+  @Autowired private StatusService statusService;
 
-    @Autowired
-    PaymentTypeService paymentTypeService;
+  @Autowired private PaymentTypeService paymentTypeService;
 
-    @Autowired
-    UserService userService;
+  @Autowired private UserService userService;
 
-    @Autowired
-    GiftCardService giftCardService;
+  @Autowired private GiftCardService giftCardService;
 
-    @Autowired
-    ArrangementAudService arrangementAudService;
+  @Autowired private ArrangementAudService arrangementAudService;
 
-    @Autowired
-    SecurityUtil securityUtil;
+  @Autowired private SecurityUtil securityUtil;
 
-    private final String createdStatus = "created";
+  private static final String createdStatus = "created";
 
-    public Arrangement findById(int arrangementId) {
-        return arrangementRepository.findById(arrangementId)
-                .orElseThrow(() -> new NotFoundException("Nije pronadjen aranzman sa id: " + arrangementId + "!"));
+  public Arrangement findById(int arrangementId) {
+    return arrangementRepository
+        .findById(arrangementId)
+        .orElseThrow(
+            () -> new NotFoundException("Nije pronađen aranžman sa ID: " + arrangementId + "!"));
+  }
+
+  @Transactional
+  public Arrangement save(CreateArrangementDto dto) {
+    Baby baby = babyService.findById(dto.getBabyId());
+    Status status = statusService.findByStatusCode(createdStatus);
+    ServicePackage servicePackage = servicePackageService.findById(dto.getServicePackageId());
+    User actionByUser = securityUtil.getCurrentUser();
+
+    Arrangement arrangement = new Arrangement();
+    arrangement.setBaby(baby);
+    arrangement.setServicePackage(servicePackage);
+    arrangement.setStatus(status);
+    arrangement.setCreatedByUser(actionByUser);
+    arrangement.setNote(dto.getNote());
+    arrangement.setRemainingTerm(servicePackage.getTermNumber());
+
+    applyDiscountIfPresent(arrangement, servicePackage, dto.getDiscountId());
+    applyGiftCardIfPresent(arrangement, dto.getGiftCardId());
+
+    arrangementRepository.save(arrangement);
+    arrangementAudService.save(arrangement, actionByUser, UserActionType.create);
+
+    return arrangement;
+  }
+
+  @Transactional
+  public FindAllArrangementDto update(UpdateArrangementDto dto) {
+    Arrangement arrangement = findById(dto.getArrangementId());
+    Arrangement arrangementBeforeUpdate = arrangement;
+
+    Baby baby = arrangement.getBaby();
+    ServicePackage servicePackage = arrangement.getServicePackage();
+
+    // ako postoji rezervacija za aranzman, ne moze se mijenjati beba i paket usluga
+    if (!reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
+      baby = babyService.findById(dto.getBabyId());
+      servicePackage = servicePackageService.findById(dto.getServicePackageId());
+      arrangement.setRemainingTerm(servicePackage.getTermNumber());
     }
 
-    @Transactional
-    public Arrangement save(CreateArrangementDto createArrangementDto) {
-        Arrangement arrangement = new Arrangement();
-        Baby baby = babyService.findById(createArrangementDto.getBabyId());
-        Status status = statusService.findByStatusCode(createdStatus);
-        ServicePackage servicePackage = servicePackageService.findById(createArrangementDto.getServicePackageId());
+    Status status = statusService.findById(dto.getStatusId());
 
-        if (Objects.nonNull(createArrangementDto.getDiscountId())) {
-            Discount discount = discountService.findById(createArrangementDto.getDiscountId());
-            arrangement.setDiscount(discount);
-            if (discount.isPrecentage()) {
-                BigDecimal discountValue = servicePackage.getPrice().multiply(discount.getValue())
-                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-                arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
-            } else {
-                if (discount.getValue().compareTo(servicePackage.getPrice()) > 0) {
-                    throw new BusinessException("Popust je veći od cijene paketa usluge!");
-                } else {
-                    arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
-                }
-            }
-        } else {
-            arrangement.setPrice(servicePackage.getPrice());
-        }
+    applyPaymentType(arrangement, dto.getPaymentTypeId());
+    applyDiscountIfPresent(arrangement, servicePackage, dto.getDiscountId());
+    applyGiftCardIfPresent(arrangement, dto.getGiftCardId());
 
-        if (Objects.nonNull(createArrangementDto.getGiftCardId())) {
-            if (Objects.isNull(arrangement.getDiscount())) {
-                throw new BusinessException("Morate izabrati popust!");
-            } else {
-                arrangement.setGiftCard(giftCardService.findById(createArrangementDto.getGiftCardId()));
-            }
-        }
+    arrangement.setBaby(baby);
+    arrangement.setServicePackage(servicePackage);
+    arrangement.setNote(dto.getNote());
+    arrangement.setStatus(status);
+    arrangement.setExtendDurationDays(dto.getExtendDurationDays());
+    arrangement.setUpdatedByUser(securityUtil.getCurrentUser());
 
-        arrangement.setNote(createArrangementDto.getNote());
-        arrangement.setBaby(baby);
-        arrangement.setRemainingTerm(servicePackage.getTermNumber());
-        arrangement.setServicePackage(servicePackage);
-        arrangement.setStatus(status);
-        arrangement.setCreatedByUser(securityUtil.getCurrentUser());
+    arrangementRepository.save(arrangement);
+    arrangementAudService.save(
+        arrangementBeforeUpdate, securityUtil.getCurrentUser(), UserActionType.update);
 
-        arrangementRepository.save(arrangement);
-        arrangementAudService.save(arrangement, securityUtil.getCurrentUser(), UserActionType.create);
+    return buildFindAllArrangementDtoFromArrangement(arrangement);
+  }
 
-        return arrangement;
+  private void applyPaymentType(Arrangement arrangement, Integer paymentTypeId) {
+    if (paymentTypeId == null || paymentTypeId == 0) {
+      arrangement.setPaymentType(null);
+      return;
+    }
+    arrangement.setPaymentType(paymentTypeService.findById(paymentTypeId));
+  }
+
+  private void applyDiscountIfPresent(
+      Arrangement arrangement, ServicePackage servicePackage, Integer discountId) {
+    if (discountId == null || discountId == 0) {
+      arrangement.setDiscount(null);
+      arrangement.setPrice(servicePackage.getPrice());
+      return;
     }
 
-    @Transactional
-    public FindAllArrangementDto update(UpdateArrangementDto updateArrangementDto) {
-        Arrangement arrangement = findById(updateArrangementDto.getArrangementId());
-        Baby baby;
-        ServicePackage servicePackage;
-        Arrangement arrangementBeforeUpdate = arrangement;
+    Discount discount = discountService.findById(discountId);
+    arrangement.setDiscount(discount);
 
-        // ako postoji rezervacija moze mijenjati samo status, discount i paymentType
+    BigDecimal basePrice = servicePackage.getPrice();
+    if (discount.isPrecentage()) {
+      BigDecimal discountValue =
+          basePrice
+              .multiply(discount.getValue())
+              .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+      arrangement.setPrice(basePrice.subtract(discountValue));
+    } else {
+      if (discount.getValue().compareTo(basePrice) > 0) {
+        throw new BusinessException("Popust je veći od cijene paketa usluge!");
+      }
+      arrangement.setPrice(basePrice.subtract(discount.getValue()));
+    }
+  }
 
-        if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
-            baby = arrangement.getBaby();
-            servicePackage = arrangement.getServicePackage();
-            arrangement.setRemainingTerm(arrangement.getRemainingTerm());
-        } else {
-            baby = babyService.findById(updateArrangementDto.getBabyId());
-            servicePackage = servicePackageService.findById(updateArrangementDto.getServicePackageId());
-            arrangement.setRemainingTerm(servicePackage.getTermNumber());
-        }
-
-        Status status = statusService.findById(updateArrangementDto.getStatusId());
-
-        if (!Objects.equals(updateArrangementDto.getPaymentTypeId(), 0)
-                && Objects.nonNull(updateArrangementDto.getPaymentTypeId())) {
-            PaymentType paymentType = paymentTypeService.findById(updateArrangementDto.getPaymentTypeId());
-            arrangement.setPaymentType(paymentType);
-        } else {
-            arrangement.setPaymentType(null);
-        }
-
-        if (!Objects.equals(updateArrangementDto.getDiscountId(), 0)
-                && Objects.nonNull(updateArrangementDto.getDiscountId())) {
-            if (Objects.nonNull(arrangement.getDiscount())) {
-                arrangement.setDiscount(null);
-                arrangement.setPrice(servicePackage.getPrice());
-            }
-            Discount discount = discountService.findById(updateArrangementDto.getDiscountId());
-            arrangement.setDiscount(discount);
-            if (discount.isPrecentage()) {
-                BigDecimal discountValue = servicePackage.getPrice().multiply(discount.getValue())
-                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-                arrangement.setPrice(servicePackage.getPrice().subtract(discountValue));
-
-            } else {
-                if (discount.getValue().compareTo(arrangement.getPrice()) > 0) {
-                    throw new BusinessException("Popust je veći od cijene aranžmana!");
-                } else {
-                    arrangement.setPrice(servicePackage.getPrice().subtract(discount.getValue()));
-                }
-            }
-        } else {
-            arrangement.setPrice(servicePackage.getPrice());
-            arrangement.setDiscount(null);
-        }
-
-        if (Objects.nonNull(updateArrangementDto.getGiftCardId())) {
-            if (Objects.isNull(arrangement.getDiscount())) {
-                throw new BusinessException("Morate izabrati popust!");
-            }
-            GiftCard giftCard = giftCardService.findById(updateArrangementDto.getGiftCardId());
-            if (Objects.nonNull(giftCard.getExpirationDate())) {
-                LocalDate expirationDate = giftCard.getExpirationDate().toLocalDate();
-                LocalDate today = LocalDate.now();
-                if (today.isAfter(expirationDate)) {
-                    throw new BusinessException("Poklon kartica je istekla!");
-                }
-            }
-            if (Objects.nonNull(arrangement.getGiftCard()) && !giftCard.equals(arrangement.getGiftCard())) {
-                giftCardService.updateGiftCardStatus(false, arrangement.getGiftCard());
-            }
-            arrangement.setGiftCard(giftCardService.updateGiftCardStatus(true, giftCard));
-        } else {
-            if (Objects.nonNull(arrangement.getGiftCard())) {
-                giftCardService.updateGiftCardStatus(false, arrangement.getGiftCard());
-            }
-            arrangement.setGiftCard(null);
-        }
-
-        arrangement.setBaby(baby);
-        arrangement.setServicePackage(servicePackage);
-        arrangement.setNote(updateArrangementDto.getNote());
-        arrangement.setStatus(status);
-        arrangement.setExtendDurationDays(updateArrangementDto.getExtendDurationDays());
-        arrangement.setUpdatedByUser(securityUtil.getCurrentUser());
-
-        arrangementRepository.save(arrangement);
-        arrangementAudService.save(arrangementBeforeUpdate, securityUtil.getCurrentUser(), UserActionType.update);
-        return buildFindAllArrangementDtoFromArrangement(arrangement);
+  private void applyGiftCardIfPresent(Arrangement arrangement, Integer giftCardId) {
+    if (giftCardId == null) {
+      if (arrangement.getGiftCard() != null) {
+        giftCardService.updateGiftCardStatus(false, arrangement.getGiftCard());
+      }
+      arrangement.setGiftCard(null);
+      return;
     }
 
-    @Transactional
-    public void decreaseRemainingTerm(Arrangement arrangement) {
-        arrangement.setRemainingTerm(arrangement.getRemainingTerm() - 1);
-
-        arrangementRepository.save(arrangement);
+    if (arrangement.getDiscount() == null) {
+      throw new BusinessException("Morate izabrati popust da primijenite poklon karticu!");
     }
 
-    @Transactional
-    public void increaseRemainingTerm(Arrangement arrangement) {
-        arrangement.setRemainingTerm(arrangement.getRemainingTerm() + 1);
+    GiftCard giftCard = giftCardService.findById(giftCardId);
+    validateGiftCardExpiration(giftCard);
 
-        arrangementRepository.save(arrangement);
+    if (arrangement.getGiftCard() != null && !giftCard.equals(arrangement.getGiftCard())) {
+      giftCardService.updateGiftCardStatus(false, arrangement.getGiftCard());
+    }
+    arrangement.setGiftCard(giftCardService.updateGiftCardStatus(true, giftCard));
+  }
+
+  private void validateGiftCardExpiration(GiftCard giftCard) {
+    if (giftCard.getExpirationDate() != null) {
+      LocalDate expirationDate = giftCard.getExpirationDate().toLocalDate();
+      if (LocalDate.now().isAfter(expirationDate)) {
+        throw new BusinessException("Poklon kartica je istekla!");
+      }
+    }
+  }
+
+  @Transactional
+  public void decreaseRemainingTerm(Arrangement arrangement) {
+    arrangement.setRemainingTerm(arrangement.getRemainingTerm() - 1);
+
+    arrangementRepository.save(arrangement);
+  }
+
+  @Transactional
+  public void increaseRemainingTerm(Arrangement arrangement) {
+    arrangement.setRemainingTerm(arrangement.getRemainingTerm() + 1);
+
+    arrangementRepository.save(arrangement);
+  }
+
+  @Transactional
+  public int delete(int arrangementId) {
+
+    Arrangement arrangement = findById(arrangementId);
+
+    if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
+
+      throw new BusinessException(
+          "Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
     }
 
-    @Transactional
-    public int delete(int arrangementId) {
+    arrangement.setDeleted(true);
+    arrangement.setDeletedAt(LocalDateTime.now());
+    arrangement.setDeletedByUser(securityUtil.getCurrentUser());
+    arrangementRepository.save(arrangement);
+    arrangementAudService.save(arrangement, securityUtil.getCurrentUser(), UserActionType.delete);
+    return arrangementId;
+  }
 
-        Arrangement arrangement = findById(arrangementId);
+  public boolean existsByServicePackage(int servicePackageId) {
+    ServicePackage servicePackage = servicePackageService.findById(servicePackageId);
 
-        if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
+    return arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false);
+  }
 
-            throw new BusinessException("Nije moguće obrisati aranžman ako ima rezervacija vezanih za njega!");
-        }
+  public Page<FindAllArrangementDto> findAll(
+      int page,
+      int size,
+      Integer babyId,
+      Integer statusId,
+      Integer servicePackageId,
+      Integer paymentTypeId,
+      Integer giftCardId,
+      Integer remainingTerm,
+      BigDecimal startPrice,
+      BigDecimal endPrice,
+      Integer arrangementId,
+      LocalDateTime startDate,
+      LocalDateTime endDate) {
 
-        arrangement.setDeleted(true);
-        arrangement.setDeletedAt(LocalDateTime.now());
-        arrangement.setDeletedByUser(securityUtil.getCurrentUser());
-        arrangementRepository.save(arrangement);
-        arrangementAudService.save(arrangement, securityUtil.getCurrentUser(), UserActionType.delete);
-        return arrangementId;
+    if (startDate == null && endDate != null) {
+      startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
+    } else if (startDate != null && endDate == null) {
+      endDate = LocalDateTime.now().plusMinutes(15);
     }
 
-    public boolean existsByServicePackage(int servicePackageId) {
-        ServicePackage servicePackage = servicePackageService.findById(servicePackageId);
+    Pageable pageable = PageRequest.of(page, size, Sort.by("arrangementId").descending());
 
-        return arrangementRepository.existsByServicePackageAndIsDeleted(servicePackage, false);
+    Specification<Arrangement> spec =
+        Specification.where(
+                ArrangementSpecifications.withFilters(
+                    statusId,
+                    babyId,
+                    paymentTypeId,
+                    giftCardId,
+                    servicePackageId,
+                    arrangementId,
+                    remainingTerm,
+                    startPrice,
+                    endPrice))
+            .and(ArrangementSpecifications.dateRange(startDate, endDate))
+            .and(ArrangementSpecifications.tenantAndNotDeleted(TenantContext.getTenant()));
+
+    Page<Arrangement> pageResult = arrangementRepository.findAll(spec, pageable);
+
+    List<FindAllArrangementDto> dtos =
+        pageResult.getContent().stream()
+            .map(this::buildFindAllArrangementDtoFromArrangement)
+            .toList();
+
+    return new PageImpl<>(dtos, pageable, pageResult.getTotalElements());
+  }
+
+  public BigDecimal findTotalSum(
+      Integer babyId,
+      Integer statusId,
+      Integer servicePackageId,
+      Integer paymentTypeId,
+      Integer giftCardId,
+      Integer remainingTerm,
+      BigDecimal startPrice,
+      BigDecimal endPrice,
+      Integer arrangementId,
+      LocalDateTime startDate,
+      LocalDateTime endDate) {
+
+    if (startDate == null && endDate != null) {
+      startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
+    } else if (startDate != null && endDate == null) {
+      endDate = LocalDateTime.now().plusMinutes(15);
     }
 
-    public Page<FindAllArrangementDto> findAll(int page, int size, Integer babyId, Integer statusId,
-                                               Integer servicePackageId, Integer paymentTypeId, Integer giftCardId, Integer remaingingTerm, BigDecimal startPrice,
-                                               BigDecimal endPrice, Integer arrangementId, LocalDateTime startDate, LocalDateTime endDate) {
-        List<FindAllArrangementDto> arrangementDto;
-        List<Arrangement> arrangement;
+    return arrangementRepository.findTotalPriceSum(
+        statusId,
+        babyId,
+        paymentTypeId,
+        giftCardId,
+        startPrice,
+        endPrice,
+        remainingTerm,
+        servicePackageId,
+        arrangementId,
+        startDate,
+        endDate,
+        TenantContext.getTenant(),
+        false);
+  }
 
-        if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
-            startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
-        } else if (Objects.nonNull(startDate) && Objects.isNull(endDate)) {
-            endDate = LocalDateTime.now().plusMinutes(15);
-        }
+  public List<ShortDetailsDto> findAllArrangementList() {
+    return arrangementRepository.findByRemainingTermGreaterThanAndIsDeleted(0, false).stream()
+        .map(this::buildShortDetailsFromArrangement)
+        .toList();
+  }
 
-        if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
-            arrangement = arrangementRepository.findAllArrangementNative(statusId, babyId, paymentTypeId, giftCardId, startPrice,
-                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant(), false);
-        } else {
-            arrangement = arrangementRepository.findAllArrangementNativeWithStartDateAndDate(statusId, babyId,
-                    paymentTypeId, giftCardId, startPrice, endPrice, remaingingTerm, servicePackageId, arrangementId, startDate,
-                    endDate, TenantContext.getTenant(), false);
-        }
+  private ShortDetailsDto buildShortDetailsFromArrangement(Arrangement arrangement) {
+    ShortDetailsDto shortDetailsDto = new ShortDetailsDto();
 
-        arrangementDto = arrangement.stream().map(this::buildFindAllArrangementDtoFromArrangement)
-                .toList();
-
-        Pageable pageable = PageRequest.of(page, size);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), arrangementDto.size());
-        if (start > end) {
-            start = end = 0;
-        }
-
-        final Page<FindAllArrangementDto> pageItem = new PageImpl<>(arrangementDto.subList(start, end), pageable,
-                arrangementDto.size());
-
-        return pageItem;
-    }
-
-    public BigDecimal findTotalSum(Integer babyId, Integer statusId, Integer servicePackageId, Integer paymentTypeId, Integer giftCardId,
-                                   Integer remaingingTerm, BigDecimal startPrice, BigDecimal endPrice, Integer arrangementId,
-                                   LocalDateTime startDate, LocalDateTime endDate) {
-        if (Objects.isNull(startDate) && Objects.nonNull(endDate)) {
-            startDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
-        } else if (Objects.nonNull(startDate) && Objects.isNull(endDate)) {
-            endDate = LocalDateTime.now().plusMinutes(15);
-        }
-
-        BigDecimal price;
-
-        if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
-            price = arrangementRepository.findPriceForAllArrangementNative(statusId, babyId, paymentTypeId, giftCardId, startPrice,
-                    endPrice, remaingingTerm, servicePackageId, arrangementId, TenantContext.getTenant(), false);
-        } else {
-            price = arrangementRepository.findPriceForAllArrangementNativeWithStartDateAndDate(statusId, babyId,
-                    paymentTypeId, giftCardId, startPrice, endPrice, remaingingTerm, servicePackageId, arrangementId, startDate,
-                    endDate, TenantContext.getTenant(), false);
-        }
-
-        return price;
-    }
-
-    public List<ShortDetailsDto> findAllArrangementList() {
-        return arrangementRepository
-                .findByRemainingTermGreaterThanAndIsDeleted(0, false).stream()
-                .map(this::buildShortDetailsFromArrangement).toList();
-    }
-
-    private ShortDetailsDto buildShortDetailsFromArrangement(Arrangement arrangement) {
-        ShortDetailsDto shortDetailsDto = new ShortDetailsDto();
-
-        shortDetailsDto.setId(arrangement.getArrangementId());
-        shortDetailsDto.setValue("(" + arrangement.getArrangementId() + ") " + arrangement.getBaby().getBabyName()
-                + (Objects.nonNull(arrangement.getBaby().getBabySurname())
+    shortDetailsDto.setId(arrangement.getArrangementId());
+    shortDetailsDto.setValue(
+        "("
+            + arrangement.getArrangementId()
+            + ") "
+            + arrangement.getBaby().getBabyName()
+            + (Objects.nonNull(arrangement.getBaby().getBabySurname())
                 ? " " + arrangement.getBaby().getBabySurname()
                 : "")
-                + "(" + arrangement.getBaby().getPhoneNumber() + ")" + " - "
-                + arrangement.getServicePackage().getServicePackageName());
+            + "("
+            + arrangement.getBaby().getPhoneNumber()
+            + ")"
+            + " - "
+            + arrangement.getServicePackage().getServicePackageName());
 
-        return shortDetailsDto;
+    return shortDetailsDto;
+  }
 
+  public FindAllArrangementDto buildFindAllArrangementDtoFromArrangement(Arrangement arrangement) {
+    FindAllArrangementDto findAllArrangementDto = new FindAllArrangementDto();
+    findAllArrangementDto.setArrangementId(arrangement.getArrangementId());
+    findAllArrangementDto.setCreatedAt(arrangement.getCreatedAt());
+    findAllArrangementDto.setNote(arrangement.getNote());
+    findAllArrangementDto.setPrice(arrangement.getPrice());
+    findAllArrangementDto.setRemainingTerm(arrangement.getRemainingTerm());
+    findAllArrangementDto.setBabyDetails(
+        new ShortDetailsDto(
+            arrangement.getBaby().getBabyId(),
+            arrangement.getBaby().getBabyName()
+                + (Objects.nonNull(arrangement.getBaby().getBabySurname())
+                    ? " " + arrangement.getBaby().getBabySurname()
+                    : "")
+                + " ("
+                + arrangement.getBaby().getPhoneNumber()
+                + ")"));
+    if (Objects.nonNull(arrangement.getDiscount())) {
+      String value;
+      if (arrangement.getDiscount().isPrecentage()) {
+        value = arrangement.getDiscount().getValue().toString() + "%";
+      } else {
+        value = arrangement.getDiscount().getValue().toString() + "KM";
+      }
+      findAllArrangementDto.setDiscount(
+          new ShortDetailsDto(arrangement.getDiscount().getDiscountId(), value));
+    }
+    findAllArrangementDto.setServicePackage(
+        new ShortDetailsDto(
+            arrangement.getServicePackage().getServicePackageId(),
+            arrangement.getServicePackage().getServicePackageName()));
+    findAllArrangementDto.setStatus(
+        new ShortDetailsDto(
+            arrangement.getStatus().getStatusId(), arrangement.getStatus().getStatusCode()));
+    if (Objects.nonNull(arrangement.getPaymentType())) {
+      findAllArrangementDto.setPaymentType(
+          new ShortDetailsDto(
+              arrangement.getPaymentType().getPaymentTypeId(),
+              arrangement.getPaymentType().getPaymentTypeName()));
+    }
+    findAllArrangementDto.setExtendDurationDays(arrangement.getExtendDurationDays());
+    if (Objects.nonNull(arrangement.getGiftCard())) {
+      findAllArrangementDto.setGiftCard(
+          new ShortDetailsDto(
+              arrangement.getGiftCard().getGiftCardId(),
+              arrangement.getGiftCard().getSerialNumber()));
     }
 
-    public FindAllArrangementDto buildFindAllArrangementDtoFromArrangement(Arrangement arrangement) {
-        FindAllArrangementDto findAllArrangementDto = new FindAllArrangementDto();
-        findAllArrangementDto.setArrangementId(arrangement.getArrangementId());
-        findAllArrangementDto.setCreatedAt(arrangement.getCreatedAt());
-        findAllArrangementDto.setNote(arrangement.getNote());
-        findAllArrangementDto.setPrice(arrangement.getPrice());
-        findAllArrangementDto.setRemainingTerm(arrangement.getRemainingTerm());
-        findAllArrangementDto.setBabyDetails(new ShortDetailsDto(arrangement.getBaby().getBabyId(),
-                arrangement.getBaby().getBabyName() + (Objects.nonNull(arrangement.getBaby().getBabySurname())
-                        ? " " + arrangement.getBaby().getBabySurname()
-                        : "") + " (" + arrangement.getBaby().getPhoneNumber() + ")"));
-        if (Objects.nonNull(arrangement.getDiscount())) {
-            String value;
-            if (arrangement.getDiscount().isPrecentage()) {
-                value = arrangement.getDiscount().getValue().toString() + "%";
-            } else {
-                value = arrangement.getDiscount().getValue().toString() + "KM";
-            }
-            findAllArrangementDto.setDiscount(new ShortDetailsDto(arrangement.getDiscount().getDiscountId(), value));
-        }
-        findAllArrangementDto
-                .setServicePackage(new ShortDetailsDto(arrangement.getServicePackage().getServicePackageId(),
-                        arrangement.getServicePackage().getServicePackageName()));
-        findAllArrangementDto.setStatus(
-                new ShortDetailsDto(arrangement.getStatus().getStatusId(), arrangement.getStatus().getStatusCode()));
-        if (Objects.nonNull(arrangement.getPaymentType())) {
-            findAllArrangementDto.setPaymentType(new ShortDetailsDto(arrangement.getPaymentType().getPaymentTypeId(),
-                    arrangement.getPaymentType().getPaymentTypeName()));
-        }
-        findAllArrangementDto.setExtendDurationDays(arrangement.getExtendDurationDays());
-        if (Objects.nonNull(arrangement.getGiftCard())) {
-            findAllArrangementDto.setGiftCard(new ShortDetailsDto(arrangement.getGiftCard().getGiftCardId(), arrangement.getGiftCard().getSerialNumber()));
-        }
-
-        return findAllArrangementDto;
-    }
-
+    return findAllArrangementDto;
+  }
 }

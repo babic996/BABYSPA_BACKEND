@@ -10,13 +10,13 @@ import com.backend.babyspa.v1.models.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    Optional<User> findByUsername(String username);
+  Optional<User> findByUsername(String username);
 
-    boolean existsByUsername(String username);
+  boolean existsByUsername(String username);
 
-    boolean existsByEmail(String email);
+  boolean existsByEmail(String email);
 
-    boolean existsByUsernameAndUserIdNot(String username, int userId);
+  boolean existsByUsernameAndUserIdNot(String username, int userId);
 
-    boolean existsByEmailAndUserIdNot(String email, int userId);
+  boolean existsByEmailAndUserIdNot(String email, int userId);
 }

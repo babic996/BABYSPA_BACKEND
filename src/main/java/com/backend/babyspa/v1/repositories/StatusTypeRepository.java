@@ -8,5 +8,5 @@ import com.backend.babyspa.v1.models.StatusType;
 @Repository
 public interface StatusTypeRepository extends JpaRepository<StatusType, Integer> {
 
-	StatusType findByStatusTypeCode(String statusTypeCode);
+  StatusType findByStatusTypeCode(String statusTypeCode);
 }

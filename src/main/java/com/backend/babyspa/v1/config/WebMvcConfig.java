@@ -8,12 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private TenantInterceptor tenantInterceptor;
+  @Autowired private TenantInterceptor tenantInterceptor;
 
-    @Override
-    public void addInterceptors(@org.springframework.lang.NonNull InterceptorRegistry registry) {
-        registry.addInterceptor(tenantInterceptor);
-    }
+  @Override
+  public void addInterceptors(@org.springframework.lang.NonNull InterceptorRegistry registry) {
+    registry.addInterceptor(tenantInterceptor);
+  }
 }
-

@@ -19,24 +19,24 @@ import org.hibernate.annotations.Filter;
 @Table(name = "arrangement_aud")
 public class ArrangementAud extends TenantEntity {
 
-    @Id
-    @Column(name = "arrangement_aud_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int arrangementAudId;
+  @Id
+  @Column(name = "arrangement_aud_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int arrangementAudId;
 
-    @OneToOne
-    @JoinColumn(name = "arrangement_snapshot_id", nullable = false)
-    private ArrangementSnapshot arrangementSnapshot;
+  @OneToOne
+  @JoinColumn(name = "arrangement_snapshot_id", nullable = false)
+  private ArrangementSnapshot arrangementSnapshot;
 
-    private int arrangementId;
+  private int arrangementId;
 
-    @Enumerated(EnumType.STRING)
-    private UserActionType userActionType;
+  @Enumerated(EnumType.STRING)
+  private UserActionType userActionType;
 
-    @ManyToOne
-    @JoinColumn(name = "action_by_user_id", referencedColumnName = "user_id")
-    private User actionByUser;
+  @ManyToOne
+  @JoinColumn(name = "action_by_user_id", referencedColumnName = "user_id")
+  private User actionByUser;
 
-    @JoinColumn(name = "action_at", nullable = false)
-    private LocalDateTime actionAt = LocalDateTime.now();
+  @JoinColumn(name = "action_at", nullable = false)
+  private LocalDateTime actionAt = LocalDateTime.now();
 }

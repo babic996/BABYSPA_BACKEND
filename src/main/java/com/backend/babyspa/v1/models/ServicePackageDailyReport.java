@@ -25,21 +25,21 @@ import org.hibernate.annotations.Filter;
 @Table(name = "service_package_daily_report")
 public class ServicePackageDailyReport extends TenantEntity {
 
-	@Id
-	@Column(name = "service_package_daily_report_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int servicePackageDailyReportId;
+  @Id
+  @Column(name = "service_package_daily_report_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int servicePackageDailyReportId;
 
-	@Column(name = "number_of_used_packages", nullable = false)
-	private int numberOfUsedPackages;
+  @Column(name = "number_of_used_packages", nullable = false)
+  private int numberOfUsedPackages;
 
-	@Column(name = "date", nullable = false)
-	private LocalDate date;
+  @Column(name = "date", nullable = false)
+  private LocalDate date;
 
-	@ManyToOne
-	@JoinColumn(name = "service_package_id", nullable = true)
-	private ServicePackage servicePackage;
+  @ManyToOne
+  @JoinColumn(name = "service_package_id", nullable = true)
+  private ServicePackage servicePackage;
 
-	@Column(name = "tenant_id", nullable = false)
-	private String tenantId;
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
 }

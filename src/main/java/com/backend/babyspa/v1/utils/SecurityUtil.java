@@ -12,24 +12,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityUtil {
 
-    @Autowired
-    UserService userService;
+  @Autowired private UserService userService;
 
-    public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+  public User getCurrentUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof AuthUserDetails) {
-            String username = ((AuthUserDetails) principal).getUsername();
-            return userService.findByUsername(username);
-        }
-
-        return null;
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return null;
     }
-}
 
+    Object principal = authentication.getPrincipal();
+
+    if (principal instanceof AuthUserDetails) {
+      String username = ((AuthUserDetails) principal).getUsername();
+      return userService.findByUsername(username);
+    }
+
+    return null;
+  }
+}

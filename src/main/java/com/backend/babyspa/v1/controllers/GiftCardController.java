@@ -20,43 +20,52 @@ import java.util.List;
 @RequestMapping("/gift-card")
 public class GiftCardController {
 
-    @Autowired
-    GiftCardService giftCardService;
+  @Autowired private GiftCardService giftCardService;
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<GiftCard>> save(@RequestBody @Valid CreateGiftCardDto createGiftCardDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<GiftCard>> save(
+      @RequestBody @Valid CreateGiftCardDto createGiftCardDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(giftCardService.save(createGiftCardDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(giftCardService.save(createGiftCardDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<GiftCard>> update(@RequestBody @Valid UpdateGiftCardDto updateGiftCardDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<GiftCard>> update(
+      @RequestBody @Valid UpdateGiftCardDto updateGiftCardDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(giftCardService.update(updateGiftCardDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(giftCardService.update(updateGiftCardDto)));
+  }
 
-    @GetMapping("/find-all-list")
-    public ResponseEntity<ApiResponse<List<GiftCard>>> findAllList(@RequestParam(required = false) Boolean isUsed, @RequestParam(required = false) Integer arrangementId) {
+  @GetMapping("/find-all-list")
+  public ResponseEntity<ApiResponse<List<GiftCard>>> findAllList(
+      @RequestParam(required = false) Boolean isUsed,
+      @RequestParam(required = false) Integer arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(giftCardService.findAllList(isUsed, arrangementId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(giftCardService.findAllList(isUsed, arrangementId)));
+  }
 
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<Page<FindAllGiftCardDto>>> findAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) String serialNumber,
+      @RequestParam(required = false) Boolean isUsed,
+      @RequestParam(required = false) Integer giftCardId,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate) {
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<FindAllGiftCardDto>>> findAll(@RequestParam(defaultValue = "0") int page,
-                                                                         @RequestParam(defaultValue = "10") int size,
-                                                                         @RequestParam(required = false) String serialNumber,
-                                                                         @RequestParam(required = false) Boolean isUsed,
-                                                                         @RequestParam(required = false) Integer giftCardId,
-                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            giftCardService.findAll(
+                page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate)));
+  }
 
-        return ResponseEntity.ok(ApiResponse.success(giftCardService.findAll(page, size, serialNumber, isUsed, giftCardId, startRangeDate, endRangeDate)));
-    }
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int giftCardId) {
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int giftCardId) {
-
-        return ResponseEntity.ok(ApiResponse.success(giftCardService.delete(giftCardId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(giftCardService.delete(giftCardId)));
+  }
 }

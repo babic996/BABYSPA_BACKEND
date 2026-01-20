@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.backend.babyspa.v1.models.GiftCard;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,119 +16,50 @@ import com.backend.babyspa.v1.models.Baby;
 import com.backend.babyspa.v1.models.ServicePackage;
 
 @Repository
-public interface ArrangementRepository extends JpaRepository<Arrangement, Integer> {
+public interface ArrangementRepository
+    extends JpaRepository<Arrangement, Integer>, JpaSpecificationExecutor<Arrangement> {
 
-    List<Arrangement> findByRemainingTermGreaterThanAndIsDeleted(int remainingTerm, boolean isDeleted);
+  List<Arrangement> findByRemainingTermGreaterThanAndIsDeleted(
+      int remainingTerm, boolean isDeleted);
 
-    boolean existsByServicePackageAndIsDeleted(ServicePackage servicePackage, boolean isDeleted);
+  boolean existsByServicePackageAndIsDeleted(ServicePackage servicePackage, boolean isDeleted);
 
-    boolean existsByBabyAndIsDeleted(Baby baby, boolean isDeleted);
+  boolean existsByBabyAndIsDeleted(Baby baby, boolean isDeleted);
 
-    boolean existsByGiftCardAndIsDeleted(GiftCard giftCard, boolean isDeleted);
+  boolean existsByGiftCardAndIsDeleted(GiftCard giftCard, boolean isDeleted);
 
-    @Query(value = """
-            SELECT a.*
-            FROM arrangement a
-            JOIN status s ON a.status_id = s.status_id
-            JOIN baby b ON a.baby_id = b.baby_id
-            LEFT JOIN payment_type pt ON a.payment_type_id = pt.payment_type_id
-            LEFT JOIN gift_card gc ON a.gift_card_id = gc.gift_card_id
-            JOIN service_package sp ON a.service_package_id = sp.service_package_id
-            WHERE (:statusId IS NULL OR s.status_id = :statusId)
-            AND (:babyId IS NULL OR b.baby_id = :babyId)
-            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
-            AND (:paymentTypeId IS NULL OR pt.payment_type_id = :paymentTypeId)
-            AND (:giftCardId IS NULL OR gc.gift_card_id = :giftCardId)
-            AND (:servicePackageId IS NULL OR sp.service_package_id = :servicePackageId)
-            AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
-            AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
-            AND (a.tenant_id = :tenantId)
-            AND (a.is_deleted = :isDeleted)
-            ORDER BY a.arrangement_id DESC
-            """, nativeQuery = true)
-    List<Arrangement> findAllArrangementNative(@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-                                               @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId, @Param("startPrice") BigDecimal startPrice,
-                                               @Param("endPrice") BigDecimal endPrice, @Param("remainingTerm") Integer remainingTerm,
-                                               @Param("servicePackageId") Integer servicePackageId, @Param("arrangementId") Integer arrangementId,
-                                               @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
-
-    @Query(value = """
-            SELECT a.*
-            FROM arrangement a
-            JOIN status s ON a.status_id = s.status_id
-            JOIN baby b ON a.baby_id = b.baby_id
-            LEFT JOIN payment_type pt ON a.payment_type_id = pt.payment_type_id
-            LEFT JOIN gift_card gc ON a.gift_card_id = gc.gift_card_id
-            JOIN service_package sp ON a.service_package_id = sp.service_package_id
-            WHERE (:statusId IS NULL OR s.status_id = :statusId)
-            AND (:babyId IS NULL OR b.baby_id = :babyId)
-            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
-            AND (:paymentTypeId IS NULL OR pt.payment_type_id = :paymentTypeId)
-            AND (:giftCardId IS NULL OR gc.gift_card_id = :giftCardId)
-            AND (:servicePackageId IS NULL OR sp.service_package_id = :servicePackageId)
-            AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
-            AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
-            AND (a.created_at >= :startDate AND a.created_at <= :endDate)
-            AND (a.tenant_id = :tenantId)
-            AND (a.is_deleted = :isDeleted)
-            ORDER BY a.arrangement_id DESC
-            """, nativeQuery = true)
-    List<Arrangement> findAllArrangementNativeWithStartDateAndDate(@Param("statusId") Integer statusId,
-                                                                   @Param("babyId") Integer babyId, @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId,
-                                                                   @Param("startPrice") BigDecimal startPrice, @Param("endPrice") BigDecimal endPrice,
-                                                                   @Param("remainingTerm") Integer remainingTerm, @Param("servicePackageId") Integer servicePackageId,
-                                                                   @Param("arrangementId") Integer arrangementId, @Param("startDate") LocalDateTime startDate,
-                                                                   @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
-
-    @Query(value = """
-            SELECT SUM(a.price)
-            FROM arrangement a
-            JOIN status s ON a.status_id = s.status_id
-            JOIN baby b ON a.baby_id = b.baby_id
-            LEFT JOIN payment_type pt ON a.payment_type_id = pt.payment_type_id
-            LEFT JOIN gift_card gc ON a.gift_card_id = gc.gift_card_id
-            JOIN service_package sp ON a.service_package_id = sp.service_package_id
-            WHERE (:statusId IS NULL OR s.status_id = :statusId)
-            AND (:babyId IS NULL OR b.baby_id = :babyId)
-            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
-            AND (:paymentTypeId IS NULL OR pt.payment_type_id = :paymentTypeId)
-            AND (:giftCardId IS NULL OR gc.gift_card_id = :giftCardId)
-            AND (:servicePackageId IS NULL OR sp.service_package_id = :servicePackageId)
-            AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
-            AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
-            AND (a.tenant_id = :tenantId)
-            AND (a.is_deleted = :isDeleted)
-            """, nativeQuery = true)
-    BigDecimal findPriceForAllArrangementNative(@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-                                                @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId, @Param("startPrice") BigDecimal startPrice,
-                                                @Param("endPrice") BigDecimal endPrice, @Param("remainingTerm") Integer remainingTerm,
-                                                @Param("servicePackageId") Integer servicePackageId, @Param("arrangementId") Integer arrangementId,
-                                                @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
-
-    @Query(value = """
-            SELECT SUM(a.price)
-            FROM arrangement a
-            JOIN status s ON a.status_id = s.status_id
-            JOIN baby b ON a.baby_id = b.baby_id
-            LEFT JOIN payment_type pt ON a.payment_type_id = pt.payment_type_id
-            LEFT JOIN gift_card gc ON a.gift_card_id = gc.gift_card_id
-            JOIN service_package sp ON a.service_package_id = sp.service_package_id
-            WHERE (:statusId IS NULL OR s.status_id = :statusId)
-            AND (:babyId IS NULL OR b.baby_id = :babyId)
-            AND (:arrangementId IS NULL OR a.arrangement_id = :arrangementId)
-            AND (:paymentTypeId IS NULL OR pt.payment_type_id = :paymentTypeId)
-            AND (:giftCardId IS NULL OR gc.gift_card_id = :giftCardId)
-            AND (:servicePackageId IS NULL OR sp.service_package_id = :servicePackageId)
-            AND (:startPrice IS NULL OR :endPrice IS NULL OR a.price BETWEEN :startPrice AND :endPrice)
-            AND (:remainingTerm IS NULL OR a.remaining_term = :remainingTerm)
-            AND (a.created_at >= :startDate AND a.created_at <= :endDate)
-            AND (a.tenant_id = :tenantId)
-            AND (a.is_deleted = :isDeleted)
-            """, nativeQuery = true)
-    BigDecimal findPriceForAllArrangementNativeWithStartDateAndDate(@Param("statusId") Integer statusId,
-                                                                    @Param("babyId") Integer babyId, @Param("paymentTypeId") Integer paymentTypeId, @Param("giftCardId") Integer giftCardId,
-                                                                    @Param("startPrice") BigDecimal startPrice, @Param("endPrice") BigDecimal endPrice,
-                                                                    @Param("remainingTerm") Integer remainingTerm, @Param("servicePackageId") Integer servicePackageId,
-                                                                    @Param("arrangementId") Integer arrangementId, @Param("startDate") LocalDateTime startDate,
-                                                                    @Param("endDate") LocalDateTime endDate, @Param("tenantId") String tenantId, @Param("isDeleted") boolean isDeleted);
+  @Query(
+      value =
+          """
+        SELECT COALESCE(SUM(a.price), 0)
+        FROM arrangement a
+        WHERE a.tenant_id = :tenantId
+        AND a.is_deleted = :isDeleted
+        AND (CAST(:statusId AS INTEGER) IS NULL OR a.status_id = CAST(:statusId AS INTEGER))
+        AND (CAST(:babyId AS INTEGER) IS NULL OR a.baby_id = CAST(:babyId AS INTEGER))
+        AND (CAST(:arrangementId AS INTEGER) IS NULL OR a.arrangement_id = CAST(:arrangementId AS INTEGER))
+        AND (CAST(:paymentTypeId AS INTEGER) IS NULL OR a.payment_type_id = CAST(:paymentTypeId AS INTEGER))
+        AND (CAST(:giftCardId AS INTEGER) IS NULL OR a.gift_card_id = CAST(:giftCardId AS INTEGER))
+        AND (CAST(:servicePackageId AS INTEGER) IS NULL OR a.service_package_id = CAST(:servicePackageId AS INTEGER))
+        AND (CAST(:remainingTerm AS INTEGER) IS NULL OR a.remaining_term = CAST(:remainingTerm AS INTEGER))
+        AND (CAST(:startPrice AS NUMERIC) IS NULL OR a.price >= CAST(:startPrice AS NUMERIC))
+        AND (CAST(:endPrice AS NUMERIC) IS NULL OR a.price <= CAST(:endPrice AS NUMERIC))
+        AND (CAST(:startDate AS TIMESTAMP) IS NULL OR a.created_at >= CAST(:startDate AS TIMESTAMP))
+        AND (CAST(:endDate AS TIMESTAMP) IS NULL OR a.created_at <= CAST(:endDate AS TIMESTAMP))
+    """,
+      nativeQuery = true)
+  BigDecimal findTotalPriceSum(
+      @Param("statusId") Integer statusId,
+      @Param("babyId") Integer babyId,
+      @Param("paymentTypeId") Integer paymentTypeId,
+      @Param("giftCardId") Integer giftCardId,
+      @Param("startPrice") BigDecimal startPrice,
+      @Param("endPrice") BigDecimal endPrice,
+      @Param("remainingTerm") Integer remainingTerm,
+      @Param("servicePackageId") Integer servicePackageId,
+      @Param("arrangementId") Integer arrangementId,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate,
+      @Param("tenantId") String tenantId,
+      @Param("isDeleted") boolean isDeleted);
 }

@@ -29,83 +29,96 @@ import jakarta.validation.Valid;
 @RequestMapping("/reservation")
 public class ReservationController {
 
-    @Autowired
-    ReservationService reservationService;
+  @Autowired private ReservationService reservationService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<Reservation>> findById(@RequestParam int reservationId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<Reservation>> findById(@RequestParam int reservationId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.findById(reservationId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(reservationService.findById(reservationId)));
+  }
 
-    @GetMapping("/find-by-arrangement-id")
-    public ResponseEntity<ApiResponse<List<ReservationShortInfo>>> findByArrangementId(
-            @RequestParam int arrangementId) {
+  @GetMapping("/find-by-arrangement-id")
+  public ResponseEntity<ApiResponse<List<ReservationShortInfo>>> findByArrangementId(
+      @RequestParam int arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.findByArrangementId(arrangementId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(reservationService.findByArrangementId(arrangementId)));
+  }
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<ReservationFindAllDto>> save(
-            @RequestBody @Valid CreateReservationDto createReservationDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<ReservationFindAllDto>> save(
+      @RequestBody @Valid CreateReservationDto createReservationDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.save(createReservationDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(reservationService.save(createReservationDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<ReservationFindAllDto>> update(
-            @RequestBody @Valid UpdateReservationDto updateReservationDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<ReservationFindAllDto>> update(
+      @RequestBody @Valid UpdateReservationDto updateReservationDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.update(updateReservationDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(reservationService.update(updateReservationDto)));
+  }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int reservationId) {
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int reservationId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.delete(reservationId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(reservationService.delete(reservationId)));
+  }
 
-    @PutMapping("/canceled")
-    public ResponseEntity<ApiResponse<Integer>> reservationCanceled(@RequestParam int reservationId) {
+  @PutMapping("/canceled")
+  public ResponseEntity<ApiResponse<Integer>> reservationCanceled(@RequestParam int reservationId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.reservationCanceled(reservationId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(reservationService.reservationCanceled(reservationId)));
+  }
 
-    @GetMapping("/find-all-list")
-    public ResponseEntity<ApiResponse<List<ReservationFindAllDto>>> findAll() {
+  @GetMapping("/find-all-list")
+  public ResponseEntity<ApiResponse<List<ReservationFindAllDto>>> findAll() {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.findAllList()));
-    }
+    return ResponseEntity.ok(ApiResponse.success(reservationService.findAllList()));
+  }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<ReservationFindAllTableDto>>> findAll(@RequestParam(defaultValue = "0") int page,
-                                                                                 @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Integer statusId,
-                                                                                 @RequestParam(required = false) Integer arrangementId,
-                                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-                                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<Page<ReservationFindAllTableDto>>> findAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) Integer statusId,
+      @RequestParam(required = false) Integer arrangementId,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.findAll(page, size, statusId,
-                arrangementId, startRangeDate, endRangeDate)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            reservationService.findAll(
+                page, size, statusId, arrangementId, startRangeDate, endRangeDate)));
+  }
 
-    @GetMapping("/find-all-by-arrangement")
-    public ResponseEntity<ApiResponse<List<Reservation>>> findAllByArrangement(@RequestParam int arrangementId) {
+  @GetMapping("/find-all-by-arrangement")
+  public ResponseEntity<ApiResponse<List<Reservation>>> findAllByArrangement(
+      @RequestParam int arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.findAllByArrangementId(arrangementId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(reservationService.findAllByArrangementId(arrangementId)));
+  }
 
-    @GetMapping("/exists-by-arrangement")
-    public ResponseEntity<ApiResponse<Boolean>> existsByArrangement(@RequestParam int arrangementId) {
+  @GetMapping("/exists-by-arrangement")
+  public ResponseEntity<ApiResponse<Boolean>> existsByArrangement(@RequestParam int arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(reservationService.existingByArrangement(arrangementId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(reservationService.existingByArrangement(arrangementId)));
+  }
 
-    @GetMapping("/generate-report")
-    public void generateReports(@RequestParam(required = true) boolean generateForAllDays,
-                                @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime date) {
+  @GetMapping("/generate-report")
+  public void generateReports(
+      @RequestParam(required = true) boolean generateForAllDays,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime date) {
 
-        reservationService.generateReportForAllDateInReservation(generateForAllDays,
-                Objects.nonNull(date) ? date.toLocalDate() : null, TenantContext.getTenant());
-    }
-
+    reservationService.generateReportForAllDateInReservation(
+        generateForAllDays,
+        Objects.nonNull(date) ? date.toLocalDate() : null,
+        TenantContext.getTenant());
+  }
 }

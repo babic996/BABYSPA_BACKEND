@@ -20,41 +20,50 @@ import java.util.List;
 @Service
 public class UserRoleService {
 
-    @Autowired
-    UserRoleRepository userRoleRepository;
+  @Autowired private UserRoleRepository userRoleRepository;
 
-    @Autowired
-    RoleService roleService;
+  @Autowired private RoleService roleService;
 
-    @Autowired
-    UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-
-    @Transactional
-    public String assignRolesToUser(AssignRolesDto assignRolesDto, Authentication authentication) {
-        boolean hasPermission = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN") || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
-        if (!hasPermission) {
-            throw new BusinessException("Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
-        }
-
-        User user = userRepository.findById(assignRolesDto.getUserId())
-                .orElseThrow(() -> new NotFoundException("Nije pronađen korisnik sa ID: " + assignRolesDto.getUserId() + "!"));
-
-        userRoleRepository.deleteByUser(user);
-        assignRolesDto.getRoleIds().forEach(roleId -> {
-            UserRole userRole = new UserRole();
-            Role role = roleService.findById(roleId);
-            userRole.setRole(role);
-            userRole.setUser(user);
-            userRole.setUserRoleKey(new UserRoleKey(user.getUserId(), role.getRoleId()));
-            userRoleRepository.save(userRole);
-        });
-
-        return "Uspješno ste dodijelili uloge korisniku: " + user.getUsername() + "!";
+  @Transactional
+  public String assignRolesToUser(AssignRolesDto assignRolesDto, Authentication authentication) {
+    boolean hasPermission =
+        authentication.getAuthorities().stream()
+            .anyMatch(
+                authority ->
+                    authority.getAuthority().equals("ROLE_ADMIN")
+                        || authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+    if (!hasPermission) {
+      throw new BusinessException(
+          "Ovaj korisnik nema ovlaštenje da dodjeluje uloge drugim korisnicima.");
     }
 
-    public List<Role> findByUser(User user) {
-        return userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
-    }
+    User user =
+        userRepository
+            .findById(assignRolesDto.getUserId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        "Nije pronađen korisnik sa ID: " + assignRolesDto.getUserId() + "!"));
+
+    userRoleRepository.deleteByUser(user);
+    assignRolesDto
+        .getRoleIds()
+        .forEach(
+            roleId -> {
+              UserRole userRole = new UserRole();
+              Role role = roleService.findById(roleId);
+              userRole.setRole(role);
+              userRole.setUser(user);
+              userRole.setUserRoleKey(new UserRoleKey(user.getUserId(), role.getRoleId()));
+              userRoleRepository.save(userRole);
+            });
+
+    return "Uspješno ste dodijelili uloge korisniku: " + user.getUsername() + "!";
+  }
+
+  public List<Role> findByUser(User user) {
+    return userRoleRepository.findByUser(user).stream().map(UserRole::getRole).toList();
+  }
 }

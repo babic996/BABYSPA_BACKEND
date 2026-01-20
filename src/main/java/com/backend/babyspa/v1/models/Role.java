@@ -19,16 +19,16 @@ import lombok.Setter;
 @Table(name = "role")
 public class Role {
 
-	@Id
-	@Column(name = "role_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int roleId;
+  @Id
+  @Column(name = "role_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int roleId;
 
-	@Column(name = "role_name", nullable = false)
-	private String roleName;
+  @Column(name = "role_name", nullable = false)
+  private String roleName;
 
-	public Role(String roleName) {
+  public Role(String roleName) {
 
-		this.roleName = roleName;
-	}
+    this.roleName = roleName;
+  }
 }

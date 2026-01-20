@@ -31,75 +31,115 @@ import jakarta.validation.Valid;
 @RequestMapping("/arrangement")
 public class ArrangementController {
 
-    @Autowired
-    ArrangementService arrangementService;
+  @Autowired private ArrangementService arrangementService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<Arrangement>> findById(@RequestParam int arrangementId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<Arrangement>> findById(@RequestParam int arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.findById(arrangementId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(arrangementService.findById(arrangementId)));
+  }
 
-    @GetMapping("/exists-by-service-package-id")
-    public ResponseEntity<ApiResponse<Boolean>> existsByServicePackageId(@RequestParam int servicePackageId) {
+  @GetMapping("/exists-by-service-package-id")
+  public ResponseEntity<ApiResponse<Boolean>> existsByServicePackageId(
+      @RequestParam int servicePackageId) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.existsByServicePackage(servicePackageId)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(arrangementService.existsByServicePackage(servicePackageId)));
+  }
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Arrangement>> save(@RequestBody @Valid CreateArrangementDto createReservationDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<Arrangement>> save(
+      @RequestBody @Valid CreateArrangementDto createReservationDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.save(createReservationDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(arrangementService.save(createReservationDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<FindAllArrangementDto>> update(
-            @RequestBody @Valid UpdateArrangementDto updateReservationDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<FindAllArrangementDto>> update(
+      @RequestBody @Valid UpdateArrangementDto updateReservationDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.update(updateReservationDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(arrangementService.update(updateReservationDto)));
+  }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int arrangementId) {
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int arrangementId) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.delete(arrangementId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(arrangementService.delete(arrangementId)));
+  }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<Page<FindAllArrangementDto>>> findAll(@RequestParam(defaultValue = "0") int page,
-                                                                            @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) BigDecimal startPrice,
-                                                                            @RequestParam(required = false) BigDecimal endPrice, @RequestParam(required = false) Integer statusId,
-                                                                            @RequestParam(required = false) Integer servicePackageId, @RequestParam(required = false) Integer babyId,
-                                                                            @RequestParam(required = false) Integer paymentTypeId,
-                                                                            @RequestParam(required = false) Integer giftCardId,
-                                                                            @RequestParam(required = false) Integer remainingTerm,
-                                                                            @RequestParam(required = false) Integer arrangementId,
-                                                                            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-                                                                            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<Page<FindAllArrangementDto>>> findAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) BigDecimal startPrice,
+      @RequestParam(required = false) BigDecimal endPrice,
+      @RequestParam(required = false) Integer statusId,
+      @RequestParam(required = false) Integer servicePackageId,
+      @RequestParam(required = false) Integer babyId,
+      @RequestParam(required = false) Integer paymentTypeId,
+      @RequestParam(required = false) Integer giftCardId,
+      @RequestParam(required = false) Integer remainingTerm,
+      @RequestParam(required = false) Integer arrangementId,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.findAll(page, size, babyId, statusId, servicePackageId,
-                paymentTypeId, giftCardId, remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            arrangementService.findAll(
+                page,
+                size,
+                babyId,
+                statusId,
+                servicePackageId,
+                paymentTypeId,
+                giftCardId,
+                remainingTerm,
+                startPrice,
+                endPrice,
+                arrangementId,
+                startRangeDate,
+                endRangeDate)));
+  }
 
-    @GetMapping("/find-price")
-    public ResponseEntity<ApiResponse<BigDecimal>> findTotalSum(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) BigDecimal startPrice,
-                                                                @RequestParam(required = false) BigDecimal endPrice, @RequestParam(required = false) Integer statusId,
-                                                                @RequestParam(required = false) Integer servicePackageId, @RequestParam(required = false) Integer babyId,
-                                                                @RequestParam(required = false) Integer paymentTypeId,
-                                                                @RequestParam(required = false) Integer giftCardId,
-                                                                @RequestParam(required = false) Integer remainingTerm,
-                                                                @RequestParam(required = false) Integer arrangementId,
-                                                                @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime startRangeDate,
-                                                                @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false) LocalDateTime endRangeDate) {
+  @GetMapping("/find-price")
+  public ResponseEntity<ApiResponse<BigDecimal>> findTotalSum(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) BigDecimal startPrice,
+      @RequestParam(required = false) BigDecimal endPrice,
+      @RequestParam(required = false) Integer statusId,
+      @RequestParam(required = false) Integer servicePackageId,
+      @RequestParam(required = false) Integer babyId,
+      @RequestParam(required = false) Integer paymentTypeId,
+      @RequestParam(required = false) Integer giftCardId,
+      @RequestParam(required = false) Integer remainingTerm,
+      @RequestParam(required = false) Integer arrangementId,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime startRangeDate,
+      @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @RequestParam(required = false)
+          LocalDateTime endRangeDate) {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.findTotalSum(babyId, statusId, servicePackageId, paymentTypeId, giftCardId,
-                remainingTerm, startPrice, endPrice, arrangementId, startRangeDate, endRangeDate)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            arrangementService.findTotalSum(
+                babyId,
+                statusId,
+                servicePackageId,
+                paymentTypeId,
+                giftCardId,
+                remainingTerm,
+                startPrice,
+                endPrice,
+                arrangementId,
+                startRangeDate,
+                endRangeDate)));
+  }
 
-    @GetMapping("/find-all-list")
-    public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
+  @GetMapping("/find-all-list")
+  public ResponseEntity<ApiResponse<List<ShortDetailsDto>>> findAllList() {
 
-        return ResponseEntity.ok(ApiResponse.success(arrangementService.findAllArrangementList()));
-    }
+    return ResponseEntity.ok(ApiResponse.success(arrangementService.findAllArrangementList()));
+  }
 }

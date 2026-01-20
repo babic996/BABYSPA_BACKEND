@@ -12,12 +12,13 @@ import com.backend.babyspa.v1.models.StatusType;
 @Repository
 public interface StatusRepository extends JpaRepository<Status, Integer> {
 
-	boolean existsByStatusNameAndStatusCodeAndStatusType(String statusName, String statusCode, StatusType statusType);
+  boolean existsByStatusNameAndStatusCodeAndStatusType(
+      String statusName, String statusCode, StatusType statusType);
 
-	boolean existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(String statusName, String statusCode,
-			StatusType statusType, int statusId);
+  boolean existsByStatusNameAndStatusCodeAndStatusTypeAndStatusIdNot(
+      String statusName, String statusCode, StatusType statusType, int statusId);
 
-	Optional<Status> findByStatusCode(String statusCode);
+  Optional<Status> findByStatusCode(String statusCode);
 
-	List<Status> findByStatusType_StatusTypeCode(String statusTypeCode);
+  List<Status> findByStatusType_StatusTypeCode(String statusTypeCode);
 }

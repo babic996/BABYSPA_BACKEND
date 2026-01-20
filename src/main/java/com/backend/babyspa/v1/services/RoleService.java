@@ -12,22 +12,24 @@ import com.backend.babyspa.v1.repositories.RoleRepository;
 @Service
 public class RoleService {
 
-    @Autowired
-    RoleRepository roleRepository;
+  @Autowired private RoleRepository roleRepository;
 
-    public Role findById(int roleId) {
+  public Role findById(int roleId) {
 
-        return roleRepository.findById(roleId)
-                .orElseThrow(() -> new NotFoundException("Nije pronađena uloga sa ID: " + roleId + "!"));
-    }
+    return roleRepository
+        .findById(roleId)
+        .orElseThrow(() -> new NotFoundException("Nije pronađena uloga sa ID: " + roleId + "!"));
+  }
 
-    public Role findByRoleName(String roleName) {
+  public Role findByRoleName(String roleName) {
 
-        return roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new NotFoundException("Nije pronađena uloga sa nazivom: " + roleName + "!"));
-    }
+    return roleRepository
+        .findByRoleName(roleName)
+        .orElseThrow(
+            () -> new NotFoundException("Nije pronađena uloga sa nazivom: " + roleName + "!"));
+  }
 
-    public List<Role> findAll() {
-        return roleRepository.findAll();
-    }
+  public List<Role> findAll() {
+    return roleRepository.findAll();
+  }
 }

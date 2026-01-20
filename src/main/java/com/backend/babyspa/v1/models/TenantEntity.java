@@ -12,15 +12,15 @@ import org.hibernate.annotations.ParamDef;
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @EntityListeners(TenantListener.class)
 public abstract class TenantEntity {
-    
-    @Column(name = "tenant_id", nullable = false)
-    private String tenantId;
 
-    public String getTenantId() {
-        return tenantId;
-    }
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId) {
+    this.tenantId = tenantId;
+  }
 }

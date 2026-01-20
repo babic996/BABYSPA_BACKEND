@@ -15,84 +15,99 @@ import com.backend.babyspa.v1.models.ReservationDailyReport;
 import com.backend.babyspa.v1.projections.ReservationDailyReportProjection;
 import com.backend.babyspa.v1.repositories.ReservationDailyReportRepository;
 import com.backend.babyspa.v1.utils.DateTimeUtil;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservationDailyReportService {
 
-    @Autowired
-    ReservationDailyReportRepository reservationDailyReportRepository;
+  @Autowired private ReservationDailyReportRepository reservationDailyReportRepository;
 
-    @Autowired
-    BabyService babyService;
+  @Autowired private BabyService babyService;
 
-    @Transactional
-    public ReservationDailyReport save(ReservationDailyReportDto reservationDailyReportDto, String tenantId) {
+  @Transactional
+  public ReservationDailyReport save(
+      ReservationDailyReportDto reservationDailyReportDto, String tenantId) {
 
-        ReservationDailyReport reservationDailyReport = new ReservationDailyReport();
+    ReservationDailyReport reservationDailyReport = new ReservationDailyReport();
 
-        if (Objects.nonNull(reservationDailyReportDto.getStatus())) {
-            reservationDailyReport.setStatus(reservationDailyReportDto.getStatus());
-        }
-        reservationDailyReport.setNumberOfReservation(reservationDailyReportDto.getNumberOfReservation());
-        reservationDailyReport.setDate(reservationDailyReportDto.getDate());
-        reservationDailyReport.setBaby(babyService.findById(reservationDailyReportDto.getBabyId()));
-        reservationDailyReport.setTenantId(tenantId);
+    if (Objects.nonNull(reservationDailyReportDto.getStatus())) {
+      reservationDailyReport.setStatus(reservationDailyReportDto.getStatus());
+    }
+    reservationDailyReport.setNumberOfReservation(
+        reservationDailyReportDto.getNumberOfReservation());
+    reservationDailyReport.setDate(reservationDailyReportDto.getDate());
+    reservationDailyReport.setBaby(babyService.findById(reservationDailyReportDto.getBabyId()));
+    reservationDailyReport.setTenantId(tenantId);
 
-        return reservationDailyReportRepository.save(reservationDailyReport);
+    return reservationDailyReportRepository.save(reservationDailyReport);
+  }
+
+  public List<ReservationDailyReportProjection> findAll(
+      Integer statusId,
+      Integer babyId,
+      LocalDateTime startRangeDate,
+      LocalDateTime endRangeDate,
+      String groupDataType) {
+
+    if (Objects.isNull(startRangeDate) && Objects.nonNull(endRangeDate)) {
+      startRangeDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
+    } else if (Objects.nonNull(startRangeDate) && Objects.isNull(endRangeDate)) {
+      endRangeDate = LocalDateTime.now().plusMinutes(15);
     }
 
-    public List<ReservationDailyReportProjection> findAll(Integer statusId, Integer babyId,
-                                                          LocalDateTime startRangeDate, LocalDateTime endRangeDate, String groupDataType) {
+    if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
+      if (groupDataType.equals(ReportSortEnum.day.name())) {
+        return reservationDailyReportRepository.findAllByStatusIdAndBabyId(
+            statusId, babyId, TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.month.name())) {
+        return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByMonth(
+            statusId, babyId, TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.year.name())) {
+        return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByYear(
+            statusId, babyId, TenantContext.getTenant());
+      }
 
-        if (Objects.isNull(startRangeDate) && Objects.nonNull(endRangeDate)) {
-            startRangeDate = DateTimeUtil.getDateTimeFromString("1999-01-01 00:00:00");
-        } else if (Objects.nonNull(startRangeDate) && Objects.isNull(endRangeDate)) {
-            endRangeDate = LocalDateTime.now().plusMinutes(15);
-        }
-
-        if (Objects.isNull(startRangeDate) && Objects.isNull(endRangeDate)) {
-            if (groupDataType.equals(ReportSortEnum.day.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyId(statusId, babyId,
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.month.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByMonth(statusId, babyId,
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.year.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyIdGroupByYear(statusId, babyId,
-                        TenantContext.getTenant());
-            }
-
-        } else {
-            if (groupDataType.equals(ReportSortEnum.day.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDate(statusId,
-                        babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(), TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.month.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
-                        statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
-                        TenantContext.getTenant());
-            } else if (groupDataType.equals(ReportSortEnum.year.name())) {
-                return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
-                        statusId, babyId, startRangeDate.toLocalDate(), endRangeDate.toLocalDate(),
-                        TenantContext.getTenant());
-            }
-        }
-
-        return null;
+    } else {
+      if (groupDataType.equals(ReportSortEnum.day.name())) {
+        return reservationDailyReportRepository.findAllByStatusIdAndBabyIdAndStartDateAndEndDate(
+            statusId,
+            babyId,
+            startRangeDate.toLocalDate(),
+            endRangeDate.toLocalDate(),
+            TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.month.name())) {
+        return reservationDailyReportRepository
+            .findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
+                statusId,
+                babyId,
+                startRangeDate.toLocalDate(),
+                endRangeDate.toLocalDate(),
+                TenantContext.getTenant());
+      } else if (groupDataType.equals(ReportSortEnum.year.name())) {
+        return reservationDailyReportRepository
+            .findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
+                statusId,
+                babyId,
+                startRangeDate.toLocalDate(),
+                endRangeDate.toLocalDate(),
+                TenantContext.getTenant());
+      }
     }
 
-    public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
-        return reservationDailyReportRepository.existsByDate(date);
-    }
+    return null;
+  }
 
-    @Transactional
-    public void deleteAllByTenantId(String tenantId) {
-        reservationDailyReportRepository.deleteAll();
-    }
+  public boolean existsByDateAndTenantId(LocalDate date, String tenantId) {
+    return reservationDailyReportRepository.existsByDate(date);
+  }
 
-    @Transactional
-    public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
-        reservationDailyReportRepository.deleteByDate(date);
-    }
+  @Transactional
+  public void deleteAllByTenantId(String tenantId) {
+    reservationDailyReportRepository.deleteAll();
+  }
+
+  @Transactional
+  public void deleteByDateAndTenantId(LocalDate date, String tenantId) {
+    reservationDailyReportRepository.deleteByDate(date);
+  }
 }

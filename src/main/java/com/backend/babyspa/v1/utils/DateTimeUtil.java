@@ -6,26 +6,27 @@ import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtil {
 
-    private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm");
+  private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+  private static DateTimeFormatter dateTimeFormatter =
+      DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm");
 
-    public static LocalDateTime getDateTimeFromString(String dateTimeString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, formatter);
-        return dateTime;
-    }
+  public static LocalDateTime getDateTimeFromString(String dateTimeString) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, formatter);
+    return dateTime;
+  }
 
-    public static String formatLocalDate(LocalDate date) {
-        if (date == null) {
-            return null;
-        }
-        return date.format(dateFormatter);
+  public static String formatLocalDate(LocalDate date) {
+    if (date == null) {
+      return null;
     }
+    return date.format(dateFormatter);
+  }
 
-    public static String formatLocalDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) {
-            return null;
-        }
-        return dateTime.format(dateTimeFormatter);
+  public static String formatLocalDateTime(LocalDateTime dateTime) {
+    if (dateTime == null) {
+      return null;
     }
+    return dateTime.format(dateTimeFormatter);
+  }
 }

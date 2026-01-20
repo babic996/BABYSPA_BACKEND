@@ -25,42 +25,45 @@ import jakarta.validation.Valid;
 @RequestMapping("/status")
 public class StatusController {
 
-    @Autowired
-    StatusService statusService;
+  @Autowired private StatusService statusService;
 
-    @GetMapping("/find-by-id")
-    public ResponseEntity<ApiResponse<Status>> findById(@RequestParam int statusId) {
+  @GetMapping("/find-by-id")
+  public ResponseEntity<ApiResponse<Status>> findById(@RequestParam int statusId) {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.findById(statusId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(statusService.findById(statusId)));
+  }
 
-    @PostMapping("/save")
-    public ResponseEntity<ApiResponse<Status>> save(@RequestBody @Valid CreateStatusDto createStatusDto) {
+  @PostMapping("/save")
+  public ResponseEntity<ApiResponse<Status>> save(
+      @RequestBody @Valid CreateStatusDto createStatusDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.save(createStatusDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(statusService.save(createStatusDto)));
+  }
 
-    @PutMapping("/update")
-    public ResponseEntity<ApiResponse<Status>> update(@RequestBody @Valid UpdateStatusDto updateStatusDto) {
+  @PutMapping("/update")
+  public ResponseEntity<ApiResponse<Status>> update(
+      @RequestBody @Valid UpdateStatusDto updateStatusDto) {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.update(updateStatusDto)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(statusService.update(updateStatusDto)));
+  }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int statusId) {
+  @DeleteMapping("/delete")
+  public ResponseEntity<ApiResponse<Integer>> delete(@RequestParam int statusId) {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.delete(statusId)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(statusService.delete(statusId)));
+  }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<ApiResponse<List<Status>>> findAll() {
+  @GetMapping("/find-all")
+  public ResponseEntity<ApiResponse<List<Status>>> findAll() {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.findAll()));
-    }
+    return ResponseEntity.ok(ApiResponse.success(statusService.findAll()));
+  }
 
-    @GetMapping("/find-all-status-type-code")
-    public ResponseEntity<ApiResponse<List<Status>>> findByStatusCode(@RequestParam String statusTypeCode) {
+  @GetMapping("/find-all-status-type-code")
+  public ResponseEntity<ApiResponse<List<Status>>> findByStatusCode(
+      @RequestParam String statusTypeCode) {
 
-        return ResponseEntity.ok(ApiResponse.success(statusService.findAllByStatusTypeCode(statusTypeCode)));
-    }
+    return ResponseEntity.ok(
+        ApiResponse.success(statusService.findAllByStatusTypeCode(statusTypeCode)));
+  }
 }

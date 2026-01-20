@@ -19,15 +19,15 @@ import lombok.Setter;
 @Table(name = "status_type")
 public class StatusType {
 
-	@Id
-	@Column(name = "status_type_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int statusTypeId;
+  @Id
+  @Column(name = "status_type_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int statusTypeId;
 
-	@Column(name = "status_type_code", nullable = false)
-	private String statusTypeCode;
+  @Column(name = "status_type_code", nullable = false)
+  private String statusTypeCode;
 
-	public StatusType(String statusTypeCode) {
-		this.statusTypeCode = statusTypeCode;
-	}
+  public StatusType(String statusTypeCode) {
+    this.statusTypeCode = statusTypeCode;
+  }
 }
