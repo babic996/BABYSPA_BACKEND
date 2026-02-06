@@ -13,17 +13,20 @@ import com.backend.babyspa.v1.models.Status;
 import com.backend.babyspa.v1.projections.ReservationDailyReportProjection;
 
 @Repository
-public interface ReservationDailyReportRepository extends JpaRepository<ReservationDailyReport, Integer> {
+public interface ReservationDailyReportRepository
+    extends JpaRepository<ReservationDailyReport, Integer> {
 
-	List<ReservationDailyReport> findByStatus(Status status);
+  List<ReservationDailyReport> findByStatus(Status status);
 
-    boolean existsByDate(LocalDate date);
+  boolean existsByDate(LocalDate date);
 
-    void deleteByDate(LocalDate date);
+  void deleteByDate(LocalDate date);
 
-    void deleteAll();
+  void deleteAll();
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 			    TO_CHAR(date, 'DD.MM.YYYY.') AS date,
 			    SUM(number_of_reservation) AS number_of_reservation
@@ -36,11 +39,16 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    date
 			ORDER BY
 			    MIN(date) ASC
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyId(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection> findAllByStatusIdAndBabyId(
+      @Param("statusId") Integer statusId,
+      @Param("babyId") Integer babyId,
+      @Param("tenantId") String tenantId);
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 			    TO_CHAR(date, 'DD.MM.YYYY.') AS date,
 			    SUM(number_of_reservation) AS number_of_reservation
@@ -53,13 +61,18 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 			    date
 			ORDER BY
 			    MIN(date) ASC
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDate(
-			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
-			@Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDate(
+      @Param("statusId") Integer statusId,
+      @Param("babyId") Integer babyId,
+      @Param("startDate") LocalDate startDate,
+      @Param("endDate") LocalDate endDate,
+      @Param("tenantId") String tenantId);
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 				TO_CHAR(date, 'Month YYYY') AS date,
 				SUM(number_of_reservation) AS number_of_reservation
@@ -72,11 +85,16 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				TO_CHAR(date, 'Month YYYY')
 			ORDER BY
 			 	MIN(date) ASC;
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByMonth(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByMonth(
+      @Param("statusId") Integer statusId,
+      @Param("babyId") Integer babyId,
+      @Param("tenantId") String tenantId);
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 			    TO_CHAR(date, 'Month YYYY') AS date,
 			    SUM(number_of_reservation) AS number_of_reservation
@@ -89,13 +107,19 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				TO_CHAR(date, 'Month YYYY')
 			ORDER BY
 			    MIN(date) ASC
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
-			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
-			@Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection>
+      findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByMonth(
+          @Param("statusId") Integer statusId,
+          @Param("babyId") Integer babyId,
+          @Param("startDate") LocalDate startDate,
+          @Param("endDate") LocalDate endDate,
+          @Param("tenantId") String tenantId);
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 				TO_CHAR(date, 'YYYY') AS date,
 				SUM(number_of_reservation) AS number_of_reservation
@@ -108,11 +132,16 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				TO_CHAR(date, 'YYYY')
 			ORDER BY
 			 	MIN(date) ASC;
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByYear(@Param("statusId") Integer statusId,
-			@Param("babyId") Integer babyId, @Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdGroupByYear(
+      @Param("statusId") Integer statusId,
+      @Param("babyId") Integer babyId,
+      @Param("tenantId") String tenantId);
 
-	@Query(value = """
+  @Query(
+      value =
+          """
 			SELECT
 			    TO_CHAR(date, 'YYYY') AS date,
 			    SUM(number_of_reservation) AS number_of_reservation
@@ -125,9 +154,13 @@ public interface ReservationDailyReportRepository extends JpaRepository<Reservat
 				TO_CHAR(date, 'YYYY')
 			ORDER BY
 			    MIN(date) ASC
-						""", nativeQuery = true)
-	List<ReservationDailyReportProjection> findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
-			@Param("statusId") Integer statusId, @Param("babyId") Integer babyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
-			@Param("tenantId") String tenantId);
+			""",
+      nativeQuery = true)
+  List<ReservationDailyReportProjection>
+      findAllByStatusIdAndBabyIdAndStartDateAndEndDateGroupByYear(
+          @Param("statusId") Integer statusId,
+          @Param("babyId") Integer babyId,
+          @Param("startDate") LocalDate startDate,
+          @Param("endDate") LocalDate endDate,
+          @Param("tenantId") String tenantId);
 }

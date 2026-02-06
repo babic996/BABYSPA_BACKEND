@@ -50,6 +50,8 @@ public class UserService {
 
   @Autowired private UserRoleService userRoleService;
 
+  private static final String initalRoleForNewTenantUser = "ROLE_ADMIN";
+
   public User findById(int userId) {
     return userRepository
         .findById(userId)
@@ -110,7 +112,8 @@ public class UserService {
 
     User user = new User();
 
-    if (userRepository.existsByUsername(registerNewUserDto.getUsername())) {
+    if (userRepository.existsByUsername(
+        registerNewUserDto.getUsername() + "@" + TenantContext.getTenant())) {
       throw new BadCredentialsException("Username već postoji.");
     }
 
@@ -151,11 +154,13 @@ public class UserService {
     user.setFirstName(addNewTenantUserDto.getFirstName());
     user.setLastName(addNewTenantUserDto.getLastName());
     user.setUsername(addNewTenantUserDto.getUsername());
+    String[] usernameParts = addNewTenantUserDto.getUsername().split("@");
+    user.setTenantId(usernameParts[1]);
     user.setPassword(passwordEncoder.encode(addNewTenantUserDto.getPassword()));
 
     userRepository.save(user);
 
-    Role role = roleService.findByRoleName("ROLE_ADMIN");
+    Role role = roleService.findByRoleName(initalRoleForNewTenantUser);
     AssignRolesDto assignRolesDto = new AssignRolesDto();
     List<Integer> roleIds = new ArrayList<>();
 
@@ -213,7 +218,7 @@ public class UserService {
     }
 
     if (userRepository.existsByUsernameAndUserIdNot(
-        updateUserDto.getUsername() + user.getTenantId(), user.getUserId())) {
+        updateUserDto.getUsername() + "@" + user.getTenantId(), user.getUserId())) {
       throw new BadCredentialsException("Postoji korisnik sa unijetim username-om.");
     }
 

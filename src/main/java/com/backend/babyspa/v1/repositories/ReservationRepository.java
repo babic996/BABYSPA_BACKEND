@@ -35,8 +35,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
   List<Reservation> findByStartDateAndStatusCode(
       LocalDateTime dayBefore, int statusId, boolean isDeleted);
 
-  void deleteByArrangement(Arrangement arrangement);
-
   @Query(
       value =
           """

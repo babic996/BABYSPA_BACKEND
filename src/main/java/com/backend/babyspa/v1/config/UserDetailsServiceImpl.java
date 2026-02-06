@@ -19,9 +19,9 @@ import com.backend.babyspa.v1.repositories.UserRoleRepository;
 @Primary
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-  @Autowired UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired UserRoleRepository userRoleRepository;
+  @Autowired private UserRoleRepository userRoleRepository;
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -34,7 +34,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         "Nije pronađen korisnik sa username-om:" + username));
     List<UserRole> userRoles = userRoleRepository.findByUser(user);
 
-    AuthUserDetails auth = new AuthUserDetails(user, userRoles);
-    return auth;
+    return new AuthUserDetails(user, userRoles);
   }
 }

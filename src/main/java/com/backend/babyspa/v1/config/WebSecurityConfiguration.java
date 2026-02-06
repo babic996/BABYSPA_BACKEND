@@ -2,6 +2,7 @@ package com.backend.babyspa.v1.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +31,24 @@ import java.util.stream.Stream;
 public class WebSecurityConfiguration {
 
   @Autowired private JwtRequestFilter jwtRequestFilter;
+
+  @Value("${app.cors.allowed-origins}")
+  private String allowedOrigins;
+
+  @Value("${app.cors.allowed-methods}")
+  private String allowedMethodsStr;
+
+  @Value("${app.cors.allowed-headers}")
+  private String allowedHeadersStr;
+
+  @Value("${app.cors.exposed-headers}")
+  private String exposedHeadersStr;
+
+  @Value("${app.cors.max-age}")
+  private Long maxAge;
+
+  @Value("${app.cors.allow-credentials}")
+  private Boolean allowCredentials;
 
   private static final String[] permitAllURLs = {"/user/login"};
 
@@ -87,11 +106,16 @@ public class WebSecurityConfiguration {
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.addAllowedOrigin("http://localhost:5173");
-    config.addAllowedOrigin("https://babyspatime.app");
-    config.addAllowedMethod("*");
-    config.addAllowedHeader("*");
-    config.setAllowCredentials(true);
+
+    for (String origin : allowedOrigins.split(",")) {
+      config.addAllowedOrigin(origin.trim());
+    }
+
+    config.setAllowedMethods(Arrays.asList(allowedMethodsStr.split(",")));
+    config.setAllowedHeaders(Arrays.asList(allowedHeadersStr.split(",")));
+    config.setExposedHeaders(Arrays.asList(exposedHeadersStr.split(",")));
+    config.setMaxAge(maxAge);
+    config.setAllowCredentials(allowCredentials);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);

@@ -82,6 +82,8 @@ public class ReservationService {
           "Nije moguće napraviti rezervaciju jer je iskorišten maksimalan broj termina!");
     }
 
+    // ovdje gledamo da li ima vec jedna rezervacija za dati aranžman jer svaki paket ima ogranicen
+    // broj trajanja dana pa nije moguce napraviti rezervaciju ako je isteklo trajanje
     if (reservationRepository.existsByArrangementAndIsDeleted(arrangement, false)) {
       Reservation firstReservation =
           reservationRepository
@@ -116,8 +118,8 @@ public class ReservationService {
     reservation.setStatus(status);
     reservation.setNote(createReservationDto.getNote());
     reservation.setCreatedByUser(securityUtil.getCurrentUser());
-    arrangementService.decreaseRemainingTerm(arrangement);
 
+    arrangementService.decreaseRemainingTerm(arrangement);
     reservationRepository.save(reservation);
 
     return buildReservationFindAllDtoFromReservation(reservation);
@@ -125,8 +127,8 @@ public class ReservationService {
 
   @Transactional
   public ReservationFindAllDto update(UpdateReservationDto updateReservationDto) {
-    Status status = statusService.findById(updateReservationDto.getStatusId());
     Reservation reservation = findById(updateReservationDto.getReservationId());
+    Status status = statusService.findById(updateReservationDto.getStatusId());
     Status statusBeforeUpdate = reservation.getStatus();
 
     if (reservation.getStatus().getStatusCode().equals(reservationCanceled)
